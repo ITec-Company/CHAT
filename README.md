@@ -1,1 +1,1 @@
-# CHAT
+The best chat for school
