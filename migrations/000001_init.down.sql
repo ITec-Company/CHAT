@@ -1,0 +1,15 @@
+DROP TABLE IF EXISTS messages_users ;
+
+DROP TABLE IF EXISTS massages;
+
+DROP TABLE IF EXISTS files ;
+
+DROP TABLE IF EXISTS chats_users;
+
+DROP TABLE IF EXISTS chats ;
+
+DROP TABLE IF EXISTS users;
+
+DROP TYPE IF EXISTS user_status;
+
+DROP TYPE IF EXISTS message_status;
