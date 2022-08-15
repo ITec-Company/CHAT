@@ -4,14 +4,22 @@ CREATE TYPE message_status AS enum ('readed', 'unreaded');
 
 
 CREATE TABLE IF NOT EXISTS  users(
-  id INTEGER PRIMARY KEY , 
+  id SERIAL  PRIMARY KEY , 
   name TEXT NOT NULL,
   status user_status NOT NULL 
 );
 
-CREATE TABLE IF NOT EXISTS  chats(
-  id INTEGER PRIMARY KEY , 
-  name TEXT NOT NULL
+CREATE TABLE IF NOT EXISTS  personal_chats(
+  id SERIAL  PRIMARY KEY , 
+  user_1 TEXT NOT NULL , 
+  user_2 TEXT NOT NULL
+
+);
+
+CREATE TABLE IF NOT EXISTS  group_chats(
+  id SERIAL  PRIMARY KEY , 
+  name TEXT NOT NULL , 
+  photo TEXT not null
 );
 
 CREATE TABLE IF NOT EXISTS  chats_users(
@@ -19,23 +27,23 @@ CREATE TABLE IF NOT EXISTS  chats_users(
   user_id INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS  files(
-  id INTEGER PRIMARY KEY , 
-  data bytea NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS  massages(
-  id INTEGER PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS  group_messages(
+  id SERIAL  PRIMARY KEY,
   chats_id INTEGER REFERENCES chats(id) ON DELETE CASCADE NOT NULL, 
   user_id INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL,
   body TEXT ,
-  file_id INTEGER REFERENCES files(id) ON DELETE CASCADE NOT NULL,
   created_at timestamp NOT NULL ,
   updated_at timestamp NOT NULL 
 );
 
+CREATE TABLE IF NOT EXISTS  files(
+  id INTEGER PRIMARY KEY , 
+  file_id INTEGER REFERENCES files(id) ON DELETE CASCADE NOT NULL,
+  data bytea NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS  messages_users(
-  messages_id INTEGER REFERENCES massages(id) ON DELETE CASCADE NOT NULL, 
+  messages_id SERIAL  REFERENCES massages(id) ON DELETE CASCADE NOT NULL, 
   user_id INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL, 
   status message_status NOT NULL 
 );
