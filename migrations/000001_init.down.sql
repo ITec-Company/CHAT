@@ -14,8 +14,9 @@ DROP TABLE IF EXISTS personal_chats ;
 
 DROP TABLE IF EXISTS users ;
 
-DROP TYPE IF EXISTS role;
+DROP TABLE IF EXISTS roles;
 
 DROP TYPE IF EXISTS user_status;
 
 DROP TYPE IF EXISTS message_status;
+
