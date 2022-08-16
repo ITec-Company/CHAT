@@ -49,6 +49,7 @@ CREATE TABLE IF NOT EXISTS private_messages(
 CREATE TABLE IF NOT EXISTS files(
   id SERIAL PRIMARY KEY , 
   group_messages_id INTEGER REFERENCES group_messages(id) ON DELETE CASCADE,
+  private_messages_id INTEGER REFERENCES private_messages(id) ON DELETE CASCADE,
   data bytea NOT NULL
 );
 
