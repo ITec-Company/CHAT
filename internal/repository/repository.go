@@ -2,8 +2,13 @@ package repository
 
 import (
 	"database/sql"
+	"errors"
 	"itec.chat/internal/domain"
 	"itec.chat/pkg/logging"
+)
+
+var (
+	ErrNoRowsAffected = errors.New("now rows affected")
 )
 
 type Chat interface {
