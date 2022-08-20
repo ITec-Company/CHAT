@@ -2,6 +2,13 @@ package models
 
 import "time"
 
+const (
+	OrderASC  Order = "asc"
+	OrderDESC Order = "desc"
+)
+
+type Order string
+
 type User struct {
 }
 
@@ -86,4 +93,12 @@ type CreateFile struct {
 type UpdateFile struct {
 	ID  int    `json:"id,omitempty"`
 	URL string `json:"url,omitempty"`
+}
+
+type SortOptions struct {
+	SortBy         string                 `json:"sort_by,omitempty"`
+	Order          Order                  `json:"order,omitempty"`
+	FiltersAndArgs map[string]interface{} `json:"filters_and_args,omitempty"`
+	Limit          uint64                 `json:"limit"`
+	Page           uint64                 `json:"page"`
 }
