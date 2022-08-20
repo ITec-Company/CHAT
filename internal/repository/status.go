@@ -2,7 +2,7 @@ package repository
 
 import (
 	"database/sql"
-	"itec.chat/internal/domain"
+	"itec.chat/internal/models"
 	"itec.chat/pkg/logging"
 )
 
@@ -18,7 +18,7 @@ func NewStatusRepository(db *sql.DB, logger *logging.Logger) (statusRepository S
 	}
 }
 
-func (rep *status) GetByID(id int) (status *domain.Status, err error) {
+func (rep *status) GetByID(id int) (status *models.Status, err error) {
 	return
 }
 
@@ -26,15 +26,14 @@ func (rep *status) GetAll(limit, offset int) (statuses []Status, err error) {
 	return
 }
 
-func (rep *status) Create(createStatus *domain.CreateStatus) (id int, err error) {
+func (rep *status) Create(createStatus *models.CreateStatus) (id int, err error) {
 	return
 }
 
-func (rep *status) Update(updateStatus *domain.UpdateStatus) (err error) {
+func (rep *status) Update(updateStatus *models.UpdateStatus) (err error) {
 	return
 }
 
 func (rep *status) Delete(id int) (err error) {
 	return
 }
-

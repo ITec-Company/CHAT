@@ -1,4 +1,4 @@
-package domain
+package models
 
 import "time"
 
@@ -8,20 +8,20 @@ type User struct {
 type Chat struct {
 	ID        int       `json:"id,omitempty"`
 	Name      string    `json:"name,omitempty"`
-	PhotoURL  string    `json:"photo-url,omitempty"`
-	CreatedAt time.Time `json:"created-at"`
-	UpdatedAt time.Time `json:"updated-at"`
+	PhotoURL  string    `json:"photo_url,omitempty"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 type CreateChat struct {
 	Name     string `json:"name"`
-	PhotoURL string `json:"photo-url,omitempty"`
+	PhotoURL string `json:"photo_url,omitempty"`
 }
 
 type UpdateChat struct {
 	ID       int    `json:"id"`
 	Name     string `json:"name,omitempty"`
-	PhotoURL string `json:"photo-url,omitempty"`
+	PhotoURL string `json:"photo_url,omitempty"`
 }
 
 type Status struct {
@@ -57,13 +57,13 @@ type Message struct {
 	Chat      Chat      `json:"chat"`
 	User      User      `json:"user"`
 	Body      string    `json:"body,omitempty"`
-	CreatedAt time.Time `json:"created-at"`
-	UpdatedAt time.Time `json:"updated-at"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 type CreateMessage struct {
-	ChatID int    `json:"chat-id"`
-	UserID int    `json:"user-id"`
+	ChatID int    `json:"chat_id"`
+	UserID int    `json:"user_id"`
 	Body   string `json:"body"`
 }
 
@@ -79,7 +79,7 @@ type File struct {
 }
 
 type CreateFile struct {
-	MessageID int    `json:"message-id"`
+	MessageID int    `json:"message_id"`
 	URL       string `json:"url"`
 }
 

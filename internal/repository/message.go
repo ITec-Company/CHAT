@@ -2,7 +2,7 @@ package repository
 
 import (
 	"database/sql"
-	"itec.chat/internal/domain"
+	"itec.chat/internal/models"
 	"itec.chat/pkg/logging"
 )
 
@@ -18,7 +18,7 @@ func NewMessageRepository(db *sql.DB, logger *logging.Logger) (messageRepository
 	}
 }
 
-func (rep *message) GetByID(id int) (message *domain.Message, err error) {
+func (rep *message) GetByID(id int) (message *models.Message, err error) {
 	return
 }
 
@@ -26,11 +26,11 @@ func (rep *message) GetAll(limit, offset int) (messages []Message, err error) {
 	return
 }
 
-func (rep *message) Create(createMessage *domain.CreateMessage) (id int, err error) {
+func (rep *message) Create(createMessage *models.CreateMessage) (id int, err error) {
 	return
 }
 
-func (rep *message) Update(updateMessage *domain.UpdateMessage) (err error) {
+func (rep *message) Update(updateMessage *models.UpdateMessage) (err error) {
 	return
 }
 

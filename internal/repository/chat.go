@@ -2,7 +2,7 @@ package repository
 
 import (
 	"database/sql"
-	"itec.chat/internal/domain"
+	"itec.chat/internal/models"
 	"itec.chat/pkg/logging"
 )
 
@@ -18,9 +18,9 @@ func NewChatRepository(db *sql.DB, logger *logging.Logg) (chatRepository Chat) {
 	}
 }
 
-func (rep *chat) GetByID(id int) (chat *domain.Chat, err error) {
+func (rep *chat) GetByID(id int) (chat *models.Chat, err error) {
 	query := `SELECT id, name, photo_url, created_at, updated_at 
-			FROM chat 
+			FROM chats 
 			WHERE id = $1 
 			GROUP BY id, name, photo_url, created_at, updated_at`
 
@@ -39,17 +39,13 @@ func (rep *chat) GetByID(id int) (chat *domain.Chat, err error) {
 	return chat, nil
 }
 
-func (rep *chat) GetAll(limit, offset int) (chats []Chat, err error) {
-	return
-}
-
-func (rep *chat) Create(createChat *domain.CreateChat) (id int, err error) {
+func (rep *chat) Create(createChat *models.CreateChat) (id int, err error) {
 	tx, err := rep.db.Begin()
 	if err != nil {
 		return 0, err
 	}
 
-	query := `INSERT INTO chat(name, photo_url) values ($1, $2) RETURNING id`
+	query := `INSERT INTO chats(name, photo_url) values ($1, $2) RETURNING id`
 
 	if err = tx.QueryRow(query,
 		createChat.Name, createChat.PhotoURL).
@@ -63,13 +59,13 @@ func (rep *chat) Create(createChat *domain.CreateChat) (id int, err error) {
 	return id, nil
 }
 
-func (rep *chat) Update(updateChat *domain.UpdateChat) (err error) {
+func (rep *chat) Update(updateChat *models.UpdateChat) (err error) {
 	tx, err := rep.db.Begin()
 	if err != nil {
 		return err
 	}
 
-	query := `UPDATE chat 
+	query := `UPDATE chats 
 			SET name = $2,
 				photo_url = $3 
 			WHERE id = $1`
@@ -87,7 +83,7 @@ func (rep *chat) Update(updateChat *domain.UpdateChat) (err error) {
 	}
 
 	if rowsAffected < 1 {
-		tx.Rollback()
+		tx.Commit()
 		return ErrNoRowsAffected
 	}
 
@@ -100,7 +96,7 @@ func (rep *chat) Delete(id int) (err error) {
 		return err
 	}
 
-	query := `DELETE FROM  chat 
+	query := `DELETE FROM  chats 
 			WHERE id = $1`
 
 	result, err := tx.Exec(query, id)
@@ -116,7 +112,7 @@ func (rep *chat) Delete(id int) (err error) {
 	}
 
 	if rowsAffected < 1 {
-		tx.Rollback()
+		tx.Commit()
 		return ErrNoRowsAffected
 	}
 

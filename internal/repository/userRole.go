@@ -2,7 +2,7 @@ package repository
 
 import (
 	"database/sql"
-	"itec.chat/internal/domain"
+	"itec.chat/internal/models"
 	"itec.chat/pkg/logging"
 )
 
@@ -18,7 +18,7 @@ func NewUserRoleRepository(db *sql.DB, logger *logging.Logger) (userRoleReposito
 	}
 }
 
-func (rep *userRole) GetByID(id int) (role *domain.UserRole, err error) {
+func (rep *userRole) GetByID(id int) (role *models.UserRole, err error) {
 	return
 }
 
@@ -26,11 +26,11 @@ func (rep *userRole) GetAll(limit, offset int) (roles []UserRole, err error) {
 	return
 }
 
-func (rep *userRole) Create(createRole *domain.CreateUserRole) (id int, err error) {
+func (rep *userRole) Create(createRole *models.CreateUserRole) (id int, err error) {
 	return
 }
 
-func (rep *userRole) Update(updateRole *domain.UpdateUserRole) (err error) {
+func (rep *userRole) Update(updateRole *models.UpdateUserRole) (err error) {
 	return
 }
 
