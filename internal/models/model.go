@@ -10,6 +10,7 @@ const (
 type Order string
 
 type User struct {
+	ID int `json:"id,omitempty"`
 }
 
 type Chat struct {
