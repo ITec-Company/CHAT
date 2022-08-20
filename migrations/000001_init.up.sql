@@ -1,60 +1,56 @@
-CREATE TYPE user_status AS enum ('active',  'away', 'offline');
-
-CREATE TYPE message_status AS enum ('readed', 'unreaded');
-
-CREATE TABLE IF NOt EXISTS roles(
-  id SERIAL PRIMARY KEY, 
-  user_role TEXT NOT NULL
+CREATE TABLE IF NOt EXISTS `statuses` (
+  `id` SERIAL PRIMARY KEY ,
+  `name` VARCHAR(200) NOT NULL UNIQUE
 );
 
-CREATE TABLE IF NOT EXISTS users(
-  id SERIAL PRIMARY KEY , 
-  profile_id INTEGER NOT NULL,  
-  name TEXT NOT NULL,
-  role role NOT NULL,
-  last_activity TIMESTAMP NOT NULL,
-  role_id INTEGER REFERENCES roles(id) ON DELETE CASCADE NOT NULL, 
-  status user_status NOT NULL 
+CREATE TABLE IF NOt EXISTS `roles` (
+  `id` SERIAL PRIMARY KEY,
+  `name` VARCHAR(200) NOT NULL UNIQUE
 );
 
-CREATE TABLE IF NOT EXISTS group_chats(
-  id SERIAL PRIMARY KEY , 
-  name TEXT NOT NULL , 
-  photo TEXT not null
+CREATE TABLE IF NOT EXISTS `users` (
+  `id` SERIAL PRIMARY KEY ,
+  `profile_id` INTEGER NOT NULL,
+  `name` VARCHAR(200) NOT NULL,
+  `last_activity` TIMESTAMP NOT NULL,
+  `role_id` INTEGER REFERENCES roles(id) ON DELETE PROTECT NOT NULL,
+  `status_id` INTEGER REFERENCES statuses(id) ON DELETE PROTECT NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS chats_users(
-  chat_id INTEGER REFERENCES group_chats(id) ON DELETE CASCADE NOT NULL, 
-  user_id INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL
+CREATE TABLE IF NOT EXISTS `chats` (
+  `id` SERIAL PRIMARY KEY,
+  `name` VARCHAR(200) NOT NULL,
+  `photo` VARCHAR(200) NOT NULL SET DEFAULT "",
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS group_messages(
-  id SERIAL PRIMARY KEY,
-  chat_id INTEGER REFERENCES group_chats(id) ON DELETE CASCADE NOT NULL, 
-  user_id INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL,
-  body TEXT ,
-  created_at timestamp NOT NULL ,
-  updated_at timestamp NOT NULL 
+CREATE TABLE IF NOT EXISTS `chats_users` (
+  `id` SERIAL PRIMARY KEY,
+  `isAdmin` bool,
+  `chat_id` INTEGER REFERENCES group_chats(id) ON DELETE CASCADE NOT NULL,
+  `user_id` INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS private_messages(
-  id SERIAL PRIMARY KEY,
-  user_id INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL,
-  body TEXT,  
-  created_at timestamp NOT NULL,
-  updated_at timestamp NOT NULL,
-  status message_status NOT NULL
+CREATE TABLE IF NOT EXISTS `messages` (
+  `id` SERIAL PRIMARY KEY,
+  `chat_id` INTEGER REFERENCES chats(id) ON DELETE CASCADE NOT NULL,
+  `created_by` INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+  `body` TEXT ,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS files(
-  id SERIAL PRIMARY KEY , 
-  group_messages_id INTEGER REFERENCES group_messages(id) ON DELETE CASCADE,
-  private_messages_id INTEGER REFERENCES private_messages(id) ON DELETE CASCADE,
-  data bytea NOT NULL
+CREATE TABLE IF NOT EXISTS `files` (
+  `id` SERIAL PRIMARY KEY,
+  `messages_id` INTEGER REFERENCES messages(id) ON DELETE CASCADE,
+  `data` VARCHAR(250) NOT NULL UNIQUE
 );
 
-CREATE TABLE IF NOT EXISTS messages_read_by_users(
-  group_messages_id INTEGER REFERENCES group_messages(id) ON DELETE CASCADE,
-  user_id INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL
+CREATE TABLE IF NOT EXISTS `messages_read_by_users` (
+  `message_id` INTEGER REFERENCES messages(id) ON DELETE CASCADE,
+  `user_id` INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+  UNIQUE KEY `userIdMessageId` (`user_id`,`message_id`),
+  PRIMARY KEY(`message_id`, `user_id`)
 );
 
