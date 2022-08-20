@@ -66,8 +66,8 @@ func (rep *chat) Update(updateChat *models.UpdateChat) (err error) {
 	}
 
 	query := `UPDATE chats 
-			SET name = $2,
-				photo_url = $3 
+			SET name = COALESCE(NULLIF($2, ''), name),
+				photo_url = COALESCE(NULLIF($3, ''), photo_url) 
 			WHERE id = $1`
 
 	result, err := tx.Exec(query, updateChat.Name, updateChat.PhotoURL)
