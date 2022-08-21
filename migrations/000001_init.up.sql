@@ -1,5 +1,5 @@
 CREATE TABLE IF NOt EXISTS `statuses` (
-  `id` SERIAL PRIMARY KEY ,
+  `id` SERIAL PRIMARY KEY,
   `name` VARCHAR(200) NOT NULL UNIQUE
 );
 
@@ -9,8 +9,8 @@ CREATE TABLE IF NOt EXISTS `roles` (
 );
 
 CREATE TABLE IF NOT EXISTS `users` (
-  `id` SERIAL PRIMARY KEY ,
-  `profile_id` INTEGER NOT NULL,
+  `id` SERIAL PRIMARY KEY,
+  `profile_id` INTEGER NOT NULL UNIQUE,
   `name` VARCHAR(200) NOT NULL,
   `last_activity` TIMESTAMP NOT NULL,
   `role_id` INTEGER REFERENCES roles(id) ON DELETE PROTECT NOT NULL,
@@ -20,14 +20,15 @@ CREATE TABLE IF NOT EXISTS `users` (
 CREATE TABLE IF NOT EXISTS `chats` (
   `id` SERIAL PRIMARY KEY,
   `name` VARCHAR(200) NOT NULL,
-  `photo` VARCHAR(200) NOT NULL SET DEFAULT "",
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  `photo_url` VARCHAR(200) NOT NULL SET DEFAULT "",
+  `is_deleted` bool NOT NULL DEFAULT false,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS `chats_users` (
   `id` SERIAL PRIMARY KEY,
-  `isAdmin` bool,
+  `is_admin` bool,
   `chat_id` INTEGER REFERENCES group_chats(id) ON DELETE CASCADE NOT NULL,
   `user_id` INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL
 );
@@ -36,21 +37,21 @@ CREATE TABLE IF NOT EXISTS `messages` (
   `id` SERIAL PRIMARY KEY,
   `chat_id` INTEGER REFERENCES chats(id) ON DELETE CASCADE NOT NULL,
   `created_by` INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL,
-  `body` TEXT ,
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  `body` TEXT,
+  `is_deleted` bool NOT NULL DEFAULT false,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS `files` (
   `id` SERIAL PRIMARY KEY,
   `messages_id` INTEGER REFERENCES messages(id) ON DELETE CASCADE,
-  `data` VARCHAR(250) NOT NULL UNIQUE
+  `data_url` VARCHAR(250) NOT NULL UNIQUE
 );
 
-CREATE TABLE IF NOT EXISTS `messages_read_by_users` (
-  `message_id` INTEGER REFERENCES messages(id) ON DELETE CASCADE,
+CREATE TABLE IF NOT EXISTS `messages_unread_by_users` (
+  `message_id` INTEGER REFERENCES messages(id) ON DELETE CASCADE NOT NULL,
   `user_id` INTEGER REFERENCES users(id) ON DELETE CASCADE NOT NULL,
-  UNIQUE KEY `userIdMessageId` (`user_id`,`message_id`),
   PRIMARY KEY(`message_id`, `user_id`)
 );
 
