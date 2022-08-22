@@ -21,6 +21,13 @@ type Chat struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
+type ChatByUser struct {
+	ID       int    `json:"id"`
+	Name     string `json:"name"`
+	PhotoURL string `json:"photo_url,omitempty"`
+	IsAdmin  bool   `json:"is_admin"`
+}
+
 type CreateChat struct {
 	Name     string `json:"name"`
 	PhotoURL string `json:"photo_url,omitempty"`

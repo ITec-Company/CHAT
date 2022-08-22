@@ -39,6 +39,43 @@ func (rep *chat) GetByID(id int) (chat *models.Chat, err error) {
 	return chat, nil
 }
 
+func (rep *chat) GetByUserID(id int) (chats []models.ChatByUser, err error) {
+	query := `WITH chat_ids AS (
+			SELECT chat_id, is_admin
+			FROM chats_users 
+			WHERE user_id = $1
+		)
+    	SELECT id, name, photo_url
+			FROM chats 
+			WHERE id = any (chat_ids)
+			GROUP BY id, name, photo_url, is_admin`
+
+	rows, err := rep.db.Query(query, id)
+	if err != nil {
+		rep.logger.Errorf("error occurred while getting chats by userID. err: %s", err)
+		return nil, err
+	}
+
+	for rows.Next() {
+		chat := models.ChatByUser{}
+		err := rows.Scan(
+			&chat.ID,
+			&chat.Name,
+			&chat.PhotoURL,
+			&chat.IsAdmin,
+		)
+
+		if err != nil {
+			rep.logger.Errorf("error occurred while getting chats by userID. err: %s", err)
+			continue
+		}
+
+		chats = append(chats, chat)
+	}
+
+	return chats, nil
+}
+
 func (rep *chat) Create(createChat *models.CreateChat) (id int, err error) {
 	tx, err := rep.db.Begin()
 	if err != nil {
