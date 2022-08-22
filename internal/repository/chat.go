@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"itec.chat/internal/models"
 	"itec.chat/pkg/logging"
+	"time"
 )
 
 type chat struct {
@@ -40,15 +41,12 @@ func (rep *chat) GetByID(id int) (chat *models.Chat, err error) {
 }
 
 func (rep *chat) GetByUserID(id int) (chats []models.ChatByUser, err error) {
-	query := `WITH chat_ids AS (
-			SELECT chat_id, is_admin
-			FROM chats_users 
-			WHERE user_id = $1
-		)
-    	SELECT id, name, photo_url
-			FROM chats 
-			WHERE id = any (chat_ids)
-			GROUP BY id, name, photo_url, is_admin`
+	query := `SELECT 
+    	c.id, c.name, c.photo_url, is_admin
+		FROM chats_users
+		LEFT JOIN chats c on chats_users.chat_id = c.id
+		WHERE user_id = $1
+		GROUP BY c.id, c.name, c.photo_url, is_admin`
 
 	rows, err := rep.db.Query(query, id)
 	if err != nil {
@@ -103,11 +101,16 @@ func (rep *chat) Update(updateChat *models.UpdateChat) (err error) {
 	}
 
 	query := `UPDATE chats 
-			SET name = COALESCE(NULLIF($2, ''), name),
-				photo_url = COALESCE(NULLIF($3, ''), photo_url) 
+			SET updated_at = $2,
+			    name = COALESCE(NULLIF($3, ''), name),
+				photo_url = COALESCE(NULLIF($4, ''), photo_url)
 			WHERE id = $1`
 
-	result, err := tx.Exec(query, updateChat.Name, updateChat.PhotoURL)
+	result, err := tx.Exec(query,
+		updateChat.ID,
+		time.Now(),
+		updateChat.Name,
+		updateChat.PhotoURL)
 	if err != nil {
 		tx.Rollback()
 		return err
@@ -133,10 +136,14 @@ func (rep *chat) Delete(id int) (err error) {
 		return err
 	}
 
-	query := `DELETE FROM  chats 
+	query := `UPDATE chats 
+			SET is_deleted = true,
+			    updated_at = $2
 			WHERE id = $1`
 
-	result, err := tx.Exec(query, id)
+	result, err := tx.Exec(query,
+		id,
+		time.Now())
 	if err != nil {
 		tx.Rollback()
 		return err
