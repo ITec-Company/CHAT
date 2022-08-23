@@ -10,6 +10,13 @@ import (
 var (
 	ErrNoRowsAffected = errors.New("now rows affected")
 )
+type User interface{
+	GetByID(id int) (user *models.User , err error)
+	GetAll(limit, offset int) (users []User, err error)
+	Create(createUser *models.CreateUser) (id int, err error)
+	Update(updateUser *models.UpdateUser) (err error)
+	Delete(id int) (err error)
+}
 
 type Chat interface {
 	GetByID(id int) (chat *models.Chat, err error)
@@ -57,6 +64,7 @@ type repository struct {
 	Message
 	Status
 	UserRole
+	User
 }
 
 func New(db *sql.DB, logger logging.Logger) (repository *repository) {

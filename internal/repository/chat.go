@@ -12,12 +12,7 @@ type chat struct {
 	logger *logging.Logg
 }
 
-func NewChatRepository(db *sql.DB, logger *logging.Logg) (chatRepository Chat) {
-	return &chat{
-		db:     db,
-		logger: logger,
-	}
-}
+ 
 
 func (rep *chat) GetByID(id int) (chat *models.Chat, err error) {
 	query := `SELECT id, name, photo_url, created_at, updated_at 
