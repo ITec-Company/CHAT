@@ -12,7 +12,7 @@ var (
 )
 
 type Chat interface {
-	GetByID(id int) (chat *models.Chat, err error)
+	GetByID(id int) (chat *models.ChatResponse, err error)
 	GetByUserID(id int) (chats []models.ChatByUser, err error)
 	Create(createChat *models.CreateChat) (id int, err error)
 	Update(updateChat *models.UpdateChat) (err error)

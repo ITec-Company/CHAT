@@ -21,11 +21,22 @@ type Chat struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
+type ChatResponse struct {
+	ID        int       `json:"id,omitempty"`
+	Name      string    `json:"name,omitempty"`
+	PhotoURL  string    `json:"photo_url,omitempty"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	AdminsIDs []int     `json:"admins_ids"`
+	UsersIDs  []int     `json:"users_ids"`
+}
+
 type ChatByUser struct {
-	ID       int    `json:"id"`
-	Name     string `json:"name"`
-	PhotoURL string `json:"photo_url,omitempty"`
-	IsAdmin  bool   `json:"is_admin"`
+	ID        int    `json:"id"`
+	Name      string `json:"name"`
+	PhotoURL  string `json:"photo_url,omitempty"`
+	AdminsIDs []int  `json:"admins_ids"`
+	UsersIDs  []int  `json:"users_ids"`
 }
 
 type CreateChat struct {

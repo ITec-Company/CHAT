@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+	"github.com/lib/pq"
 	"itec.chat/internal/models"
 	"itec.chat/pkg/logging"
 	"time"
@@ -19,7 +20,7 @@ func NewChatRepository(db *sql.DB, logger *logging.Logg) (chatRepository Chat) {
 	}
 }
 
-func (rep *chat) GetByID(id int) (chat *models.Chat, err error) {
+func (rep *chat) GetByID(id int) (chat *models.ChatResponse, err error) {
 	query := `SELECT c.id, c.name, c.photo_url, c.created_at, c.updated_at, a.admins_ids, u.users_ids
 				FROM chats c, LATERAL (
 					SELECT ARRAY (
@@ -44,6 +45,8 @@ func (rep *chat) GetByID(id int) (chat *models.Chat, err error) {
 			&chat.PhotoURL,
 			&chat.CreatedAt,
 			&chat.UpdatedAt,
+			pq.Array(&chat.AdminsIDs),
+			pq.Array(&chat.UsersIDs),
 		); err != nil {
 		rep.logger.Errorf("error occured while getting chat by id, err: %s", err)
 		return nil, err
@@ -83,7 +86,8 @@ func (rep *chat) GetByUserID(id int) (chats []models.ChatByUser, err error) {
 			&chat.ID,
 			&chat.Name,
 			&chat.PhotoURL,
-			&chat.IsAdmin,
+			pq.Array(&chat.AdminsIDs),
+			pq.Array(&chat.UsersIDs),
 		)
 
 		if err != nil {
