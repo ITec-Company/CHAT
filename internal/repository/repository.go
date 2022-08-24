@@ -24,6 +24,7 @@ type User interface {
 	UnAssignUserFromChatAdmin(chatID, userID int) (err error)
 	InviteUserToChat(chatID, userID int) (err error)
 	RemoveUserFromChat(chatID, userID int) (err error)
+	UpdateStatus(updateUserStatus *models.UpdateUserStatus) (err error)
 }
 
 type Chat interface {

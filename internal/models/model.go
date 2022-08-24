@@ -35,6 +35,11 @@ type UpdateUser struct {
 	StatusID     int       `json:"status_id"`
 }
 
+type UpdateUserStatus struct{
+	ID           int       `json:"id"`
+	StatusID     int       `json:"status_id"`
+}
+
 type Chat struct {
 	ID        int       `json:"id,omitempty"`
 	Name      string    `json:"name,omitempty"`

@@ -284,3 +284,36 @@ func (rep *user) RemoveUserFromChat(chatID, userID int) (err error) {
 
 	return nil
 }
+
+func (rep *user) UpdateStatus(updateUserStatus *models.UpdateUserStatus) (err error) {
+
+	tx, err := rep.db.Begin()
+	if err != nil {
+		return err
+	}
+
+	query := `UPDATE users
+		SET status_id = $2
+		WHERE id = $1`
+
+	result, err := tx.Exec(query,
+		updateUserStatus.ID,
+		updateUserStatus.StatusID)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	if rowsAffected < 1 {
+		tx.Commit()
+		return ErrNoRowsAffected
+	}
+
+	return tx.Commit()
+}
