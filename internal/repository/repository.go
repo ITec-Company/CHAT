@@ -3,6 +3,7 @@ package repository
 import (
 	"database/sql"
 	"errors"
+
 	"itec.chat/internal/models"
 	"itec.chat/pkg/logging"
 )
@@ -10,12 +11,19 @@ import (
 var (
 	ErrNoRowsAffected = errors.New("now rows affected")
 )
-type User interface{
-	GetByID(id int) (user *models.User , err error)
-	GetAll(limit, offset int) (users []User, err error)
+
+type User interface {
+	GetByID(id int) (user *models.User, err error)
+	GetAll(limit, offset int) (users []models.User, err error)
 	Create(createUser *models.CreateUser) (id int, err error)
 	Update(updateUser *models.UpdateUser) (err error)
 	Delete(id int) (err error)
+
+	GetUsersByChatID(id int) (users []models.User, err error)
+	AssignUserToChatAdmin(chatID, userID int) (err error)
+	UnAssignUserFromChatAdmin(chatID, userID int) (err error)
+	InviteUserToChat(chatID, userID int) (err error)
+	RemoveUserFromChat(chatID, userID int) (err error)
 }
 
 type Chat interface {
