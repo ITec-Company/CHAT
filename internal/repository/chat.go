@@ -20,10 +20,22 @@ func NewChatRepository(db *sql.DB, logger *logging.Logg) (chatRepository Chat) {
 }
 
 func (rep *chat) GetByID(id int) (chat *models.Chat, err error) {
-	query := `SELECT id, name, photo_url, created_at, updated_at 
-			FROM chats 
-			WHERE id = $1 
-			GROUP BY id, name, photo_url, created_at, updated_at`
+	query := `SELECT c.id, c.name, c.photo_url, c.created_at, c.updated_at, a.admins_ids, u.users_ids
+				FROM chats c, LATERAL (
+					SELECT ARRAY (
+								   SELECT admin_id
+								   FROM chats_admins ca
+								   WHERE ca.chat_id = $1
+							   ) as admins_ids
+					) a, LATERAL (
+					SELECT ARRAY (
+								   SELECT user_id
+								   FROM chats_users ca
+								   WHERE ca.chat_id = $1
+							   ) as users_ids
+					) u
+				WHERE id = $1
+				GROUP BY c.id, c.name, c.photo_url, c.created_at, c.updated_at, a.admins_ids, u.users_ids;`
 
 	if err = rep.db.QueryRow(query, id).
 		Scan(
@@ -41,12 +53,23 @@ func (rep *chat) GetByID(id int) (chat *models.Chat, err error) {
 }
 
 func (rep *chat) GetByUserID(id int) (chats []models.ChatByUser, err error) {
-	query := `SELECT 
-    	c.id, c.name, c.photo_url, is_admin
-		FROM chats_users
-		LEFT JOIN chats c on chats_users.chat_id = c.id
-		WHERE user_id = $1
-		GROUP BY c.id, c.name, c.photo_url, is_admin`
+	query := `SELECT c.chat_id, chat. name, chat.photo_url, users_array, admins_array
+				FROM chats_users c, LATERAL (
+					SELECT ARRAY (
+						SELECT user_id
+						FROM chats_users cu
+						WHERE chat_id = c.chat_id)
+					) users_array, LATERAL (
+						SELECT ARRAY (
+							SELECT admin_id
+							FROM chats_admins ca
+							WHERE chat_id = c.chat_id)
+					) admins_array, LATERAL (
+						SELECT name, photo_url
+						FROM chats
+						WHERE id = c.chat_id
+					) chat
+				WHERE user_id = $1`
 
 	rows, err := rep.db.Query(query, id)
 	if err != nil {
