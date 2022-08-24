@@ -45,8 +45,8 @@ func (rep *chat) GetByID(id int) (chat *models.ChatResponse, err error) {
 			&chat.PhotoURL,
 			&chat.CreatedAt,
 			&chat.UpdatedAt,
-			pq.Array(&chat.AdminsIDs),
-			pq.Array(&chat.UsersIDs),
+			pq.Array(&chat.Admins),
+			pq.Array(&chat.Users),
 		); err != nil {
 		rep.logger.Errorf("error occured while getting chat by id, err: %s", err)
 		return nil, err
@@ -188,4 +188,82 @@ func (rep *chat) Delete(id int) (err error) {
 	}
 
 	return tx.Commit()
+}
+
+func (rep *chat) AddUserToChat(userID, chatID int) (err error) {
+	query := `INSERT INTO chats_users (user_id, chat_id) values ($1, $2)`
+
+	result, err := rep.db.Exec(query,
+		userID,
+		chatID)
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected < 1 {
+		return ErrNoRowsAffected
+	}
+
+	return nil
+}
+
+func (rep *chat) RemoveUserFromChat(userID, chatID int) (err error) {
+	query := `DELETE FROM chats_users WHERE user_id = $1 AND chat_id = $2`
+
+	result, err := rep.db.Exec(query,
+		userID,
+		chatID)
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected < 1 {
+		return ErrNoRowsAffected
+	}
+
+	return nil
+}
+
+func (rep *chat) PromoteUserToAdmin(userID, chatID int) (err error) {
+	query := `DELETE FROM chats_users WHERE user_id = $1 AND chat_id = $2;
+			  INSERT INTO chats_admins (admin_id, chat_id) values ($1, $2)`
+
+	result, err := rep.db.Exec(query,
+		userID,
+		chatID)
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected < 1 {
+		return ErrNoRowsAffected
+	}
+
+	return nil
+}
+
+func (rep *chat) LowerAdminToUser(userID, chatID int) (err error) {
+	query := `DELETE FROM chats_admins WHERE admin_id = $1 AND chat_id = $2;
+			  INSERT INTO chats_users (user_id, chat_id) values ($1, $2)`
+
+	result, err := rep.db.Exec(query,
+		userID,
+		chatID)
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected < 1 {
+		return ErrNoRowsAffected
+	}
+
+	return nil
 }

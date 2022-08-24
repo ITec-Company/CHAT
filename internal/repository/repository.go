@@ -17,6 +17,10 @@ type Chat interface {
 	Create(createChat *models.CreateChat) (id int, err error)
 	Update(updateChat *models.UpdateChat) (err error)
 	Delete(id int) (err error)
+	AddUserToChat(userID, chatID int) (err error)
+	RemoveUserFromChat(userID, chatID int) (err error)
+	PromoteUserToAdmin(userID, chatID int) (err error)
+	LowerAdminToUser(userID, chatID int) (err error)
 }
 
 type File interface {

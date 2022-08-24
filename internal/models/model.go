@@ -27,8 +27,8 @@ type ChatResponse struct {
 	PhotoURL  string    `json:"photo_url,omitempty"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
-	AdminsIDs []int     `json:"admins_ids"`
-	UsersIDs  []int     `json:"users_ids"`
+	Admins    []User    `json:"admins"`
+	Users     []User    `json:"users"`
 }
 
 type ChatByUser struct {
