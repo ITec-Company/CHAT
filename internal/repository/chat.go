@@ -166,6 +166,7 @@ func (rep *chat) Update(updateChat *models.UpdateChat) (err error) {
 		time.Now(),
 		updateChat.Name,
 		updateChat.PhotoURL)
+
 	if err != nil {
 		tx.Rollback()
 		return err
@@ -199,6 +200,7 @@ func (rep *chat) Delete(id int) (err error) {
 	result, err := tx.Exec(query,
 		id,
 		time.Now())
+
 	if err != nil {
 		tx.Rollback()
 		return err

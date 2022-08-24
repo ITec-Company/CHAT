@@ -21,6 +21,7 @@ type Chat interface {
 	RemoveUserFromChat(userID, chatID int) (err error)
 	PromoteUserToAdmin(userID, chatID int) (err error)
 	LowerAdminToUser(userID, chatID int) (err error)
+
 }
 
 type File interface {

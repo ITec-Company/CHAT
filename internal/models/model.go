@@ -22,6 +22,7 @@ type Chat struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
+
 type ChatResponse struct {
 	ID        int       `json:"id,omitempty"`
 	Name      string    `json:"name,omitempty"`
