@@ -10,7 +10,8 @@ const (
 type Order string
 
 type User struct {
-	ID int `json:"id,omitempty"`
+	ID   int    `json:"id,omitempty"`
+	Name string `json:"name,omitempty"`
 }
 
 type Chat struct {

@@ -5,6 +5,8 @@ import (
 	"github.com/lib/pq"
 	"itec.chat/internal/models"
 	"itec.chat/pkg/logging"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -21,23 +23,27 @@ func NewChatRepository(db *sql.DB, logger *logging.Logg) (chatRepository Chat) {
 }
 
 func (rep *chat) GetByID(id int) (chat *models.ChatResponse, err error) {
-	query := `SELECT c.id, c.name, c.photo_url, c.created_at, c.updated_at, a.admins_ids, u.users_ids
-				FROM chats c, LATERAL (
-					SELECT ARRAY (
-								   SELECT admin_id
-								   FROM chats_admins ca
-								   WHERE ca.chat_id = $1
-							   ) as admins_ids
-					) a, LATERAL (
-					SELECT ARRAY (
-								   SELECT user_id
-								   FROM chats_users ca
-								   WHERE ca.chat_id = $1
-							   ) as users_ids
-					) u
-				WHERE id = $1
-				GROUP BY c.id, c.name, c.photo_url, c.created_at, c.updated_at, a.admins_ids, u.users_ids;`
+	query := `WITH a AS (select ARRAY (
+										  (
+											  SELECT admin_id
+											  FROM chats_admins
+											  WHERE chat_id = $1
+										  )
+									  ) admins_array,
+									ARRAY (
+										   SELECT user_id
+										   FROM chats_users cu
+										   WHERE chat_id = $1
+									   ) users_array)
+				select c.name, c.photo_url, array_agg(DISTINCT (u.id, u.name)) as admins, array_agg(DISTINCT (ua.id, ua.name)) as users
+				from chats as c, a
+				left join users u on u.id = any (a.admins_array)
+				left join users ua on ua.id = any (a.users_array)
+				where c.id = $1
+				group by c.name, c.photo_url`
 
+	var users []string
+	var admins []string
 	if err = rep.db.QueryRow(query, id).
 		Scan(
 			&chat.ID,
@@ -45,11 +51,33 @@ func (rep *chat) GetByID(id int) (chat *models.ChatResponse, err error) {
 			&chat.PhotoURL,
 			&chat.CreatedAt,
 			&chat.UpdatedAt,
-			pq.Array(&chat.Admins),
-			pq.Array(&chat.Users),
+			pq.Array(&admins),
+			pq.Array(&users),
 		); err != nil {
 		rep.logger.Errorf("error occured while getting chat by id, err: %s", err)
 		return nil, err
+	}
+
+	for _, t := range admins {
+		t = strings.Replace(t, "(", "", -1)
+		t = strings.Replace(t, ")", "", -1)
+		t = strings.Replace(t, "\"", "", -1)
+		data := strings.Split(t, ",")
+		var admin models.User
+		admin.ID, _ = strconv.Atoi(data[0])
+		admin.Name = data[1]
+		chat.Admins = append(chat.Admins, admin)
+	}
+
+	for _, t := range users {
+		t = strings.Replace(t, "(", "", -1)
+		t = strings.Replace(t, ")", "", -1)
+		t = strings.Replace(t, "\"", "", -1)
+		data := strings.Split(t, ",")
+		var user models.User
+		user.ID, _ = strconv.Atoi(data[0])
+		user.Name = data[1]
+		chat.Users = append(chat.Users, user)
 	}
 
 	return chat, nil
