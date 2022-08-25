@@ -10,7 +10,8 @@ const (
 type Order string
 
 type User struct {
-	ID int `json:"id,omitempty"`
+	ID   int    `json:"id,omitempty"`
+	Name string `json:"name,omitempty"`
 }
 
 type Chat struct {
@@ -19,6 +20,25 @@ type Chat struct {
 	PhotoURL  string    `json:"photo_url,omitempty"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
+}
+
+
+type ChatResponse struct {
+	ID        int       `json:"id,omitempty"`
+	Name      string    `json:"name,omitempty"`
+	PhotoURL  string    `json:"photo_url,omitempty"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	Admins    []User    `json:"admins"`
+	Users     []User    `json:"users"`
+}
+
+type ChatByUser struct {
+	ID        int    `json:"id"`
+	Name      string `json:"name"`
+	PhotoURL  string `json:"photo_url,omitempty"`
+	AdminsIDs []int  `json:"admins_ids"`
+	UsersIDs  []int  `json:"users_ids"`
 }
 
 type CreateChat struct {

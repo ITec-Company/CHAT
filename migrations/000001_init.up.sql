@@ -61,7 +61,12 @@ CREATE TABLE IF NOT EXISTS files (
                                         message_id INTEGER NOT NULL ,
                                         data_url VARCHAR(250) NOT NULL UNIQUE,
                                         FOREIGN KEY (message_id) REFERENCES messages(id) ON DELETE CASCADE
+);
 
-  created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+CREATE TABLE IF NOT EXISTS messages_unread_by_users (
+                                        message_id INTEGER NOT NULL,
+                                        user_id INTEGER NOT NULL,
+                                        PRIMARY KEY(message_id, user_id),
+                                        FOREIGN KEY (message_id) REFERENCES messages(id) ON DELETE CASCADE,
+                                        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
