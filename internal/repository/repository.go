@@ -28,11 +28,16 @@ type User interface {
 }
 
 type Chat interface {
-	GetByID(id int) (chat *models.Chat, err error)
+	GetByID(id int) (chat *models.ChatResponse, err error)
 	GetByUserID(id int) (chats []models.ChatByUser, err error)
 	Create(createChat *models.CreateChat) (id int, err error)
 	Update(updateChat *models.UpdateChat) (err error)
 	Delete(id int) (err error)
+	AddUserToChat(userID, chatID int) (err error)
+	RemoveUserFromChat(userID, chatID int) (err error)
+	PromoteUserToAdmin(userID, chatID int) (err error)
+	LowerAdminToUser(userID, chatID int) (err error)
+
 }
 
 type File interface {

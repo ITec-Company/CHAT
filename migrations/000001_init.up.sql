@@ -29,12 +29,19 @@ CREATE TABLE IF NOT EXISTS chats (
 );
 
 CREATE TABLE IF NOT EXISTS chats_users (
-                                        id SERIAL PRIMARY KEY,
-                                        is_admin BOOL DEFAULT FALSE,
                                         chat_id INTEGER NOT NULL,
                                         user_id INTEGER NOT NULL,
+                                        PRIMARY KEY(chat_id, user_id),
                                         FOREIGN KEY (chat_id) REFERENCES chats(id) ON DELETE CASCADE,
                                         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS chats_admins (
+                                           chat_id INTEGER NOT NULL,
+                                           admin_id INTEGER NOT NULL,
+                                           PRIMARY KEY(chat_id, admin_id),
+                                           FOREIGN KEY (chat_id) REFERENCES chats(id) ON DELETE CASCADE,
+                                           FOREIGN KEY (admin_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS messages (
