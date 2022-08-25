@@ -2,12 +2,13 @@ package repository
 
 import (
 	"database/sql"
-	"github.com/lib/pq"
-	"itec.chat/internal/models"
-	"itec.chat/pkg/logging"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/lib/pq"
+	"itec.chat/internal/models"
+	"itec.chat/pkg/logging"
 )
 
 type chat struct {
@@ -15,7 +16,12 @@ type chat struct {
 	logger *logging.Logg
 }
 
- 
+func NewChatRepository(db *sql.DB, logger *logging.Logg) (chatRepository Chat) {
+	return &chat{
+		db:     db,
+		logger: logger,
+	}
+}
 
 func (rep *chat) GetByID(id int) (chat *models.ChatResponse, err error) {
 	query := `WITH a AS (select ARRAY (
