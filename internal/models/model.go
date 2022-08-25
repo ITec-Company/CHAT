@@ -22,7 +22,6 @@ type Chat struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
-
 type ChatResponse struct {
 	ID        int       `json:"id,omitempty"`
 	Name      string    `json:"name,omitempty"`
@@ -104,6 +103,12 @@ type File struct {
 	ID      int     `json:"id,omitempty"`
 	Message Message `json:"message"`
 	URL     string  `json:"url,omitempty"`
+}
+
+type FileResponse struct {
+	ID        int    `json:"id,omitempty"`
+	MessageID int    `json:"message_id"`
+	URL       string `json:"url,omitempty"`
 }
 
 type CreateFile struct {

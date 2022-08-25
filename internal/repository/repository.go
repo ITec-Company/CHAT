@@ -21,12 +21,11 @@ type Chat interface {
 	RemoveUserFromChat(userID, chatID int) (err error)
 	PromoteUserToAdmin(userID, chatID int) (err error)
 	LowerAdminToUser(userID, chatID int) (err error)
-
 }
 
 type File interface {
 	GetByID(id int) (file *models.File, err error)
-	GetAll(limit, offset int) (files []File, err error)
+	GetByChatID(id int) (files []models.FileResponse, err error)
 	Create(createFile *models.CreateFile) (id int, err error)
 	Update(updateFile *models.UpdateFile) (err error)
 	Delete(id int) (err error)

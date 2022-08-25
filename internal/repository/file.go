@@ -19,10 +19,10 @@ func NewFileRepository(db *sql.DB, logger *logging.Logg) (fileRepository File) {
 }
 
 func (rep *file) GetByID(id int) (file *models.File, err error) {
-	query := `SELECT id, messages_id, data
+	query := `SELECT id, message_id, data_url
 			FROM files 
 			WHERE id = $1 
-			GROUP BY id, messages_id, data`
+			GROUP BY id, message_id, data_url`
 
 	if err = rep.db.QueryRow(query, id).
 		Scan(
@@ -37,8 +37,40 @@ func (rep *file) GetByID(id int) (file *models.File, err error) {
 	return file, nil
 }
 
-func (rep *file) GetAll(limit, offset int) (files []File, err error) {
-	return
+func (rep *file) GetByChatID(id int) (files []models.FileResponse, err error) {
+	query := `WITH a AS (SELECT array (
+									SELECT id
+									FROM messages
+									WHERE chat_id = 1
+										  ) messages_array)
+				SELECT id, message_id, data_url
+				FROM files, a
+				WHERE message_id = ANY (a.messages_array)
+				GROUP BY id, message_id, data_url`
+
+	rows, err := rep.db.Query(query, id)
+	if err != nil {
+		rep.logger.Errorf("error occurred while getting files by userID. err: %s", err)
+		return nil, err
+	}
+
+	for rows.Next() {
+		file := models.FileResponse{}
+		err := rows.Scan(
+			&file.ID,
+			&file.MessageID,
+			&file.URL,
+		)
+
+		if err != nil {
+			rep.logger.Errorf("error occurred while getting files by userID. err: %s", err)
+			continue
+		}
+
+		files = append(files, file)
+	}
+
+	return files, nil
 }
 
 func (rep *file) Create(createFile *models.CreateFile) (id int, err error) {
@@ -47,7 +79,7 @@ func (rep *file) Create(createFile *models.CreateFile) (id int, err error) {
 		return 0, err
 	}
 
-	query := `INSERT INTO files(messages_id, data) values ($1, $2) RETURNING id`
+	query := `INSERT INTO files(message_id, data_url) values ($1, $2) RETURNING id`
 
 	if err = tx.QueryRow(query,
 		createFile.MessageID, createFile.URL).
@@ -68,7 +100,7 @@ func (rep *file) Update(updateFile *models.UpdateFile) (err error) {
 	}
 
 	query := `UPDATE files 
-			SET data = $2
+			SET data_url = $2
 			WHERE id = $1`
 
 	result, err := tx.Exec(query, updateFile.URL)
