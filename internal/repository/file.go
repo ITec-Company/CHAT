@@ -21,8 +21,7 @@ func NewFileRepository(db *sql.DB, logger *logging.Logg) (fileRepository File) {
 func (rep *file) GetByID(id int) (file *models.File, err error) {
 	query := `SELECT id, message_id, data_url
 			FROM files 
-			WHERE id = $1 
-			GROUP BY id, message_id, data_url`
+			WHERE id = $1`
 
 	if err = rep.db.QueryRow(query, id).
 		Scan(
@@ -38,15 +37,10 @@ func (rep *file) GetByID(id int) (file *models.File, err error) {
 }
 
 func (rep *file) GetByChatID(id int) (files []models.FileResponse, err error) {
-	query := `WITH a AS (SELECT array (
-									SELECT id
-									FROM messages
-									WHERE chat_id = 1
-										  ) messages_array)
-				SELECT id, message_id, data_url
-				FROM files, a
-				WHERE message_id = ANY (a.messages_array)
-				GROUP BY id, message_id, data_url`
+	query := `SELECT  f.id, m.id, f.data_url
+				FROM messages m
+				RIGHT JOIN files f ON m.id = f.message_id
+				WHERE chat_id = $1`
 
 	rows, err := rep.db.Query(query, id)
 	if err != nil {
