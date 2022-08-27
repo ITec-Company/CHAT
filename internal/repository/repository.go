@@ -36,6 +36,7 @@ type Message interface {
 	Create(createMessage *models.CreateMessage) (id int, err error)
 	Update(updateMessage *models.UpdateMessage) (err error)
 	Delete(id int) (err error)
+	ReceiveMessage(messageID, userID int) (message *models.ReceiveMessage, err error)
 }
 
 type Status interface {

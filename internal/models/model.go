@@ -88,6 +88,13 @@ type Message struct {
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
+type ReceiveMessage struct {
+	ID        int       `json:"id"`
+	User      User      `json:"user"`
+	Body      string    `json:"body"`
+	CreatedAt time.Time `json:"created_at"`
+	IsUpdated bool      `json:"is_updated"`
+}
 
 type CreateMessage struct {
 	ChatID int    `json:"chat_id"`
