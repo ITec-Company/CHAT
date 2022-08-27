@@ -49,7 +49,7 @@ type Status interface {
 
 type UserRole interface {
 	GetByID(id int) (role *models.UserRole, err error)
-	GetAll(limit, offset int) (roles []UserRole, err error)
+	GetAll() (roles []models.UserRole, err error)
 	Create(createRole *models.CreateUserRole) (id int, err error)
 	Update(updateRole *models.UpdateUserRole) (err error)
 	Delete(id int) (err error)
