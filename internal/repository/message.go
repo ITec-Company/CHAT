@@ -19,10 +19,9 @@ func NewMessageRepository(db *sql.DB, logger *logging.Logg) (messageRepository M
 }
 
 func (rep *message) GetByID(id int) (message *models.Message, err error) {
-	query := `SELECT id, chat_id, user_id, body, created_at, updated_at
+	query := `SELECT id, chat_id, created_by, body, is_deleted, created_at, updated_at
 			FROM messages 
-			WHERE id = $1 
-			GROUP BY id, chat_id, user_id, body, created_at, updated_at`
+			WHERE id = $1`
 
 	if err = rep.db.QueryRow(query, id).
 		Scan(
@@ -30,6 +29,7 @@ func (rep *message) GetByID(id int) (message *models.Message, err error) {
 			&message.Chat.ID,
 			&message.User.ID,
 			&message.Body,
+			&message.IsDeleted,
 			&message.CreatedAt,
 			&message.UpdatedAt,
 		); err != nil {
@@ -40,17 +40,13 @@ func (rep *message) GetByID(id int) (message *models.Message, err error) {
 	return message, nil
 }
 
-func (rep *message) GetAll(limit, offset int) (messages []Message, err error) {
-	return
-}
-
 func (rep *message) Create(createMessage *models.CreateMessage) (id int, err error) {
 	tx, err := rep.db.Begin()
 	if err != nil {
 		return 0, err
 	}
 
-	query := `INSERT INTO messages(chat_id, user_id) values ($1, $2, $3) RETURNING id`
+	query := `INSERT INTO messages(chat_id, created_by) values ($1, $2, $3) RETURNING id`
 
 	if err = tx.QueryRow(query,
 		createMessage.ChatID, createMessage.UserID, createMessage.Body).
@@ -100,7 +96,8 @@ func (rep *message) Delete(id int) (err error) {
 		return err
 	}
 
-	query := `DELETE FROM  messages 
+	query := `UPDATE messages 
+			SET is_deleted = true
 			WHERE id = $1`
 
 	result, err := tx.Exec(query, id)

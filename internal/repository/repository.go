@@ -33,7 +33,6 @@ type File interface {
 
 type Message interface {
 	GetByID(id int) (message *models.Message, err error)
-	GetAll(limit, offset int) (messages []Message, err error)
 	Create(createMessage *models.CreateMessage) (id int, err error)
 	Update(updateMessage *models.UpdateMessage) (err error)
 	Delete(id int) (err error)

@@ -40,7 +40,7 @@ func (rep *file) GetByChatID(id int) (files []models.FileResponse, err error) {
 	query := `SELECT  f.id, m.id, f.data_url
 				FROM messages m
 				RIGHT JOIN files f ON m.id = f.message_id
-				WHERE chat_id = $1`
+				WHERE chat_id = $1 AND is_deleted = FALSE`
 
 	rows, err := rep.db.Query(query, id)
 	if err != nil {

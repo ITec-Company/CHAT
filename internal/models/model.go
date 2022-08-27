@@ -84,6 +84,7 @@ type Message struct {
 	Chat      Chat      `json:"chat"`
 	User      User      `json:"user"`
 	Body      string    `json:"body,omitempty"`
+	IsDeleted bool      `json:"is_deleted"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
