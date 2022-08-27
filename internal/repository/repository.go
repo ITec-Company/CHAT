@@ -41,7 +41,7 @@ type Message interface {
 
 type Status interface {
 	GetByID(id int) (status *models.Status, err error)
-	GetAll(limit, offset int) (statuses []Status, err error)
+	GetAll() (statuses []models.Status, err error)
 	Create(createStatus *models.CreateStatus) (id int, err error)
 	Update(updateStatus *models.UpdateStatus) (err error)
 	Delete(id int) (err error)
