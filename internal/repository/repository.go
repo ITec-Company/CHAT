@@ -3,6 +3,7 @@ package repository
 import (
 	"database/sql"
 	"errors"
+
 	"itec.chat/internal/models"
 	"itec.chat/pkg/logging"
 )
@@ -10,6 +11,17 @@ import (
 var (
 	ErrNoRowsAffected = errors.New("now rows affected")
 )
+
+type User interface {
+	GetByID(id int) (user *models.User, err error)
+	GetAll(limit, offset int) (users []models.User, err error)
+	Create(createUser *models.CreateUser) (id int, err error)
+	Update(updateUser *models.UpdateUser) (err error)
+	Delete(id int) (err error)
+
+	GetUsersByChatID(id int) (users []models.User, err error)
+	UpdateStatus(updateUserStatus *models.UpdateUserStatus) (err error)
+}
 
 type Chat interface {
 	GetByID(id int) (chat *models.ChatResponse, err error)
@@ -21,7 +33,6 @@ type Chat interface {
 	RemoveUserFromChat(userID, chatID int) (err error)
 	PromoteUserToAdmin(userID, chatID int) (err error)
 	LowerAdminToUser(userID, chatID int) (err error)
-
 }
 
 type File interface {
@@ -62,6 +73,7 @@ type repository struct {
 	Message
 	Status
 	UserRole
+	User
 }
 
 func New(db *sql.DB, logger logging.Logger) (repository *repository) {

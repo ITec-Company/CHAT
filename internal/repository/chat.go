@@ -2,12 +2,13 @@ package repository
 
 import (
 	"database/sql"
-	"github.com/lib/pq"
-	"itec.chat/internal/models"
-	"itec.chat/pkg/logging"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/lib/pq"
+	"itec.chat/internal/models"
+	"itec.chat/pkg/logging"
 )
 
 type chat struct {

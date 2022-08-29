@@ -10,8 +10,32 @@ const (
 type Order string
 
 type User struct {
-	ID   int    `json:"id,omitempty"`
-	Name string `json:"name,omitempty"`
+	ID           int       `json:"id"`
+	ProfileID    int       `json:"profile_id"`
+	Name         string    `json:"name"`
+	LastActivity time.Time `json:"last_activity"`
+	Role         UserRole  `json:"role"`
+	Status       Status    `json:"status"`
+}
+
+type CreateUser struct {
+	ProfileID    int       `json:"profile_id"`
+	Name         string    `json:"name"`
+	LastActivity time.Time `json:"last_activity"`
+	RoleID       int       `json:"role_id"`
+	StatusID     int       `json:"status_id"`
+}
+
+type UpdateUser struct {
+	ID           int       `json:"id"`
+	Name         string    `json:"name"`
+	LastActivity time.Time `json:"last_activity"`
+	RoleID       int       `json:"role_id"`
+}
+
+type UpdateUserStatus struct{
+	ID           int       `json:"id"`
+	StatusID     int       `json:"status_id"`
 }
 
 type Chat struct {
