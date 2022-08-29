@@ -28,11 +28,9 @@ type CreateUser struct {
 
 type UpdateUser struct {
 	ID           int       `json:"id"`
-	ProfileID    int       `json:"profile_id"`
 	Name         string    `json:"name"`
 	LastActivity time.Time `json:"last_activity"`
 	RoleID       int       `json:"role_id"`
-	StatusID     int       `json:"status_id"`
 }
 
 type UpdateUserStatus struct{

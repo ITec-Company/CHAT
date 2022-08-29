@@ -20,10 +20,6 @@ type User interface {
 	Delete(id int) (err error)
 
 	GetUsersByChatID(id int) (users []models.User, err error)
-	AssignUserToChatAdmin(chatID, userID int) (err error)
-	UnAssignUserFromChatAdmin(chatID, userID int) (err error)
-	InviteUserToChat(chatID, userID int) (err error)
-	RemoveUserFromChat(chatID, userID int) (err error)
 	UpdateStatus(updateUserStatus *models.UpdateUserStatus) (err error)
 }
 
@@ -37,7 +33,6 @@ type Chat interface {
 	RemoveUserFromChat(userID, chatID int) (err error)
 	PromoteUserToAdmin(userID, chatID int) (err error)
 	LowerAdminToUser(userID, chatID int) (err error)
-
 }
 
 type File interface {
