@@ -14,7 +14,7 @@ const (
 
 type UserHandler struct {
 	logger     logging.Logger
-	repository repository.User
+	repository *repository.User
 }
 
 func NewUserHandler(logger logging.Logger /*, user repository.User*/) *UserHandler {

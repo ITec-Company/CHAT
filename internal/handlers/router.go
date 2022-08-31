@@ -8,7 +8,7 @@ import (
 
 type Router struct {
 	Logger logging.Logger
-	Router mux.Router
+	Router *mux.Router
 	//repository repository.Repository
 
 	UserHandler http.UserHandler
@@ -17,12 +17,12 @@ type Router struct {
 func NewRouter(logger logging.Logger /*, repository *repository.Repository*/) *Router {
 	return &Router{
 		Logger: logger,
-		Router: *mux.NewRouter(),
+		Router: mux.NewRouter(),
 		//	repository:  *repository,
 		UserHandler: *http.NewUserHandler(logger /*, repository.User*/),
 	}
 }
 
 func (r *Router) InitRoutes() {
-	r.UserHandler.Register(&r.Router)
+	r.UserHandler.Register(r.Router)
 }

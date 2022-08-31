@@ -17,7 +17,7 @@ type Server struct {
 func NewServer(logger logging.Logger, router handlers.Router, host, port string) *Server {
 	srv := &http.Server{
 		Addr:           host + ":" + port,
-		Handler:        &router.Router,
+		Handler:        router.Router,
 		MaxHeaderBytes: 1 << 20, //1 Mb
 		ReadTimeout:    10 * time.Second,
 		WriteTimeout:   10 * time.Second,
