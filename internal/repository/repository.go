@@ -67,7 +67,7 @@ type UserRole interface {
 	Delete(id int) (err error)
 }
 
-type repository struct {
+type Repository struct {
 	Chat
 	File
 	Message
@@ -76,6 +76,6 @@ type repository struct {
 	User
 }
 
-func New(db *sql.DB, logger logging.Logger) (repository *repository) {
+func New(db *sql.DB, logger logging.Logger) (repository *Repository) {
 	return repository
 }
