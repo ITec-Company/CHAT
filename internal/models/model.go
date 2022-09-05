@@ -46,7 +46,6 @@ type Chat struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
-
 type ChatResponse struct {
 	ID        int       `json:"id,omitempty"`
 	Name      string    `json:"name,omitempty"`
@@ -109,8 +108,16 @@ type Message struct {
 	Chat      Chat      `json:"chat"`
 	User      User      `json:"user"`
 	Body      string    `json:"body,omitempty"`
+	IsDeleted bool      `json:"is_deleted"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
+}
+type ReceiveMessage struct {
+	ID        int       `json:"id"`
+	User      User      `json:"user"`
+	Body      string    `json:"body"`
+	CreatedAt time.Time `json:"created_at"`
+	IsUpdated bool      `json:"is_updated"`
 }
 
 type CreateMessage struct {
@@ -128,6 +135,12 @@ type File struct {
 	ID      int     `json:"id,omitempty"`
 	Message Message `json:"message"`
 	URL     string  `json:"url,omitempty"`
+}
+
+type FileResponse struct {
+	ID        int    `json:"id,omitempty"`
+	MessageID int    `json:"message_id"`
+	URL       string `json:"url,omitempty"`
 }
 
 type CreateFile struct {

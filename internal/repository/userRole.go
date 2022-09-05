@@ -36,8 +36,30 @@ func (rep *userRole) GetByID(id int) (userRole *models.UserRole, err error) {
 	return userRole, nil
 }
 
-func (rep *userRole) GetAll(limit, offset int) (userRoles []UserRole, err error) {
-	return
+func (rep *userRole) GetAll() (roles []models.UserRole, err error) {
+	query := `SELECT id, name
+			FROM roles`
+
+	rows, err := rep.db.Query(query)
+	if err != nil {
+		rep.logger.Errorf("error occurred while getting all userRoleees. err: %s", err)
+		return nil, err
+	}
+
+	for rows.Next() {
+		userRole := models.UserRole{}
+		if err = rows.Scan(
+			&userRole.ID,
+			&userRole.Name,
+		); err != nil {
+			rep.logger.Errorf("error occurred while getting all userRoleees. err: %s", err)
+			return nil, err
+		}
+
+		roles = append(roles, userRole)
+	}
+
+	return roles, nil
 }
 
 func (rep *userRole) Create(createUserRole *models.CreateUserRole) (id int, err error) {
