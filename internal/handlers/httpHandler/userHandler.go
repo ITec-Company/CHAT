@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"itec.chat/internal/service"
 	"itec.chat/pkg/logging"
 )
 
@@ -12,12 +13,14 @@ const (
 )
 
 type userHandler struct {
-	logger logging.Logger
+	logger  logging.Logger
+	service service.UserService
 }
 
-func NewUserHandler(logger logging.Logger) *userHandler {
+func NewUserHandler(logger logging.Logger, service service.UserService) *userHandler {
 	return &userHandler{
-		logger: logger,
+		logger:  logger,
+		service: service,
 	}
 }
 
@@ -26,6 +29,7 @@ func (uh *userHandler) Register(router *mux.Router) {
 }
 
 func (uh *userHandler) allUsers(w http.ResponseWriter, r *http.Request) {
+	uh.service.GetByID(2)
 	w.Write([]byte("get all Users"))
 	w.WriteHeader(http.StatusOK)
 }
