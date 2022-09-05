@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	"itec.chat/internal/handlers"
+	"itec.chat/internal/handlers/httpHandler"
 	"itec.chat/pkg/logging"
 )
 
@@ -14,10 +14,10 @@ type Server struct {
 	httpServer *http.Server
 }
 
-func NewServer(logger logging.Logger, router handlers.Router, host, port string) *Server {
+func NewServer(logger logging.Logger, handler httpHandler.Handler, host, port string) *Server {
 	srv := &http.Server{
 		Addr:           host + ":" + port,
-		Handler:        router.Router,
+		Handler:        handler.InitRoutes(),
 		MaxHeaderBytes: 1 << 20, //1 Mb
 		ReadTimeout:    10 * time.Second,
 		WriteTimeout:   10 * time.Second,

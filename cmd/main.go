@@ -8,10 +8,8 @@ import (
 	"os/signal"
 
 	"github.com/joho/godotenv"
-	"itec.chat/internal/handlers"
 
-	//"itec.chat/internal/repository"
-
+	"itec.chat/internal/handlers/httpHandler"
 	"itec.chat/pkg/logging"
 
 	//"itec.chat/pkg/repositories/postgres"
@@ -42,11 +40,10 @@ func main() {
 	repository := repository.New(db, logger)*/
 
 	logger.Info("Initializing httprouter...")
-	router := handlers.NewRouter(logger /*, repository*/)
-	router.InitRoutes()
+	handler := httpHandler.NewHandler(logger)
+	//handler.InitRoutes()
 
-	
-	server := server.NewServer(logger, *router, os.Getenv("SERVER_HOST"), os.Getenv("SERVER_PORT"))
+	server := server.NewServer(logger, *handler, os.Getenv("SERVER_HOST"), os.Getenv("SERVER_PORT"))
 	idleConnsClosed := make(chan struct{})
 	go func() {
 		c := make(chan os.Signal, 1)
