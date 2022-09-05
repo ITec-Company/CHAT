@@ -11,7 +11,6 @@ import (
 
 	"itec.chat/internal/handlers/httpHandler"
 	"itec.chat/internal/repository"
-	"itec.chat/internal/service"
 	"itec.chat/pkg/logging"
 	"itec.chat/pkg/repositories/postgres"
 
@@ -19,9 +18,7 @@ import (
 )
 
 func main() {
-	//err := godotenv.Load(".env")
-	err := godotenv.Load("dev.env")
-
+	err := godotenv.Load(".env")
 	if err != nil {
 		log.Fatalf("Error loading .env file. %s", err.Error())
 	}
@@ -42,10 +39,8 @@ func main() {
 	}
 	repository := repository.New(db, logger)
 
-	service := service.NewService(repository, logger)
-
 	logger.Info("Initializing httprouter...")
-	handler := httpHandler.NewHandler(logger, service)
+	handler := httpHandler.NewHandler(logger, repository)
 
 	server := server.NewServer(logger, *handler, os.Getenv("SERVER_HOST"), os.Getenv("SERVER_PORT"))
 	idleConnsClosed := make(chan struct{})
