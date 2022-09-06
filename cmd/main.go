@@ -10,9 +10,8 @@ import (
 	"github.com/joho/godotenv"
 
 	"itec.chat/internal/handlers/httpHandler"
-	"itec.chat/internal/repository"
+
 	"itec.chat/pkg/logging"
-	"itec.chat/pkg/repositories/postgres"
 
 	"itec.chat/pkg/server"
 )
@@ -25,7 +24,7 @@ func main() {
 
 	logger := logging.GetLogger()
 
-	db, err := postgres.NewPostgresDB(&postgres.PostgresDB{
+	/*db, err := postgres.NewPostgresDB(&postgres.PostgresDB{
 		Host:     os.Getenv("DB_HOST"),
 		Port:     os.Getenv("POSTGRES_PORT"),
 		Username: os.Getenv("POSTGRES_USER"),
@@ -37,10 +36,10 @@ func main() {
 	if err != nil {
 		logger.Panicf("Error while initialisation database:%s", err)
 	}
-	repository := repository.New(db, logger)
+	repository := repository.New(db, logger)*/
 
 	logger.Info("Initializing httprouter...")
-	handler := httpHandler.NewHandler(logger, repository)
+	handler := httpHandler.NewHandler(logger /*, repository*/)
 
 	server := server.NewServer(logger, *handler, os.Getenv("SERVER_HOST"), os.Getenv("SERVER_PORT"))
 	idleConnsClosed := make(chan struct{})
