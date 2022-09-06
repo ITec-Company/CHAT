@@ -260,8 +260,7 @@ func (rep *chat) RemoveUserFromChat(userID, chatID int) (err error) {
 }
 
 func (rep *chat) PromoteUserToAdmin(userID, chatID int) (err error) {
-	query := `DELETE FROM chats_users WHERE user_id = $1 AND chat_id = $2;
-			  INSERT INTO chats_admins (admin_id, chat_id) values ($1, $2)`
+	query := `INSERT INTO chats_admins (admin_id, chat_id) values ($1, $2)`
 
 	result, err := rep.db.Exec(query,
 		userID,
@@ -280,8 +279,7 @@ func (rep *chat) PromoteUserToAdmin(userID, chatID int) (err error) {
 }
 
 func (rep *chat) LowerAdminToUser(userID, chatID int) (err error) {
-	query := `DELETE FROM chats_admins WHERE admin_id = $1 AND chat_id = $2;
-			  INSERT INTO chats_users (user_id, chat_id) values ($1, $2)`
+	query := `DELETE FROM chats_admins WHERE admin_id = $1 AND chat_id = $2`
 
 	result, err := rep.db.Exec(query,
 		userID,

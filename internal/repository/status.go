@@ -21,8 +21,7 @@ func NewStatusRepository(db *sql.DB, logger *logging.Logg) (statusRepository Sta
 func (rep *status) GetByID(id int) (status *models.Status, err error) {
 	query := `SELECT id, name
 			FROM statuses 
-			WHERE id = $1 
-			GROUP BY id, name`
+			WHERE id = $1`
 
 	if err = rep.db.QueryRow(query, id).
 		Scan(
@@ -36,8 +35,30 @@ func (rep *status) GetByID(id int) (status *models.Status, err error) {
 	return status, nil
 }
 
-func (rep *status) GetAll(limit, offset int) (statuss []Status, err error) {
-	return
+func (rep *status) GetAll() (statuses []models.Status, err error) {
+	query := `SELECT id, name
+			FROM statuses`
+
+	rows, err := rep.db.Query(query)
+	if err != nil {
+		rep.logger.Errorf("error occurred while getting all statusees. err: %s", err)
+		return nil, err
+	}
+
+	for rows.Next() {
+		status := models.Status{}
+		if err = rows.Scan(
+			&status.ID,
+			&status.Name,
+		); err != nil {
+			rep.logger.Errorf("error occurred while getting all statusees. err: %s", err)
+			return nil, err
+		}
+
+		statuses = append(statuses, status)
+	}
+
+	return statuses, nil
 }
 
 func (rep *status) Create(createStatus *models.CreateStatus) (id int, err error) {
@@ -66,8 +87,8 @@ func (rep *status) Update(updateStatus *models.UpdateStatus) (err error) {
 		return err
 	}
 
-	query := `UPDATE statuss 
-			SET nane = $2
+	query := `UPDATE statuses 
+			SET name = $2
 			WHERE id = $1`
 
 	result, err := tx.Exec(query, updateStatus.Name)
@@ -96,7 +117,7 @@ func (rep *status) Delete(id int) (err error) {
 		return err
 	}
 
-	query := `DELETE FROM  statuss 
+	query := `DELETE FROM  statuses 
 			WHERE id = $1`
 
 	result, err := tx.Exec(query, id)
