@@ -1,11 +1,20 @@
 package main
 
 import (
+	"context"
+	"log"
+	"net/http"
+	"os"
+	"os/signal"
+
 	"github.com/joho/godotenv"
+
+	"itec.chat/internal/handlers/httpHandler"
+	"itec.chat/internal/repository"
 	"itec.chat/pkg/logging"
 	"itec.chat/pkg/repositories/postgres"
-	"log"
-	"os"
+
+	"itec.chat/pkg/server"
 )
 
 func main() {
@@ -28,5 +37,25 @@ func main() {
 	if err != nil {
 		logger.Panicf("Error while initialisation database:%s", err)
 	}
+	repository := repository.New(db, logger)
 
+	logger.Info("Initializing httprouter...")
+	handler := httpHandler.NewHandler(logger, repository)
+
+	server := server.NewServer(logger, *handler, os.Getenv("SERVER_HOST"), os.Getenv("SERVER_PORT"))
+	idleConnsClosed := make(chan struct{})
+	go func() {
+		c := make(chan os.Signal, 1)
+		signal.Notify(c, os.Interrupt)
+		<-c
+		server.Shutdown(context.Background())
+
+		log.Println("shutting down")
+		os.Exit(0)
+	}()
+
+	if err := server.Start(); err != http.ErrServerClosed {
+		logger.Panicf("Error while starting server:%s", err)
+	}
+	<-idleConnsClosed
 }
