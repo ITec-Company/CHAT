@@ -3,11 +3,10 @@ package handlers
 import (
 	"log"
 	"net/http"
-	"strconv"
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
-	"itec.chat/internal/chatsession"
+	"itec.chat/internal/wsHub"
 )
 
 var upgrader = websocket.Upgrader{
@@ -16,26 +15,24 @@ var upgrader = websocket.Upgrader{
 	CheckOrigin:     func(r *http.Request) bool { return true },
 }
 
-func Register(router *mux.Router) {
-	router.HandleFunc("/ws/{id:[0-9]+}", WebsocketHandler)
-	router.HandleFunc("/info", InfoWSHandler)
+func Register(router *mux.Router, hub *wsHub.Hub) {
+	router.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+		WebsocketHandler(w, r, hub)
+	})
 
 }
 
-func WebsocketHandler(w http.ResponseWriter, r *http.Request) {
-	chatId := mux.Vars(r)
+func WebsocketHandler(w http.ResponseWriter, r *http.Request, hub *wsHub.Hub) {
 
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		log.Print(err)
+		log.Print("error occurred while upgrading ws conn", err)
 		return
 	}
-	id, _ := strconv.Atoi(chatId["id"])
-	chatSession := chatsession.NewChatSession(ws.RemoteAddr().String(), id, ws)
 
-	chatSession.Start()
-}
+	client := wsHub.NewClient(hub, ws)
 
-func InfoWSHandler(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte(chatsession.MapInfo()))
+	go client.WritePump()
+	go client.ReadPump()
+
 }
