@@ -29,13 +29,11 @@ var upgrader = websocket.Upgrader{
 
 func (wh *websocketHandler) register(router *mux.Router) {
 	router.HandleFunc("/ws" , wh.handleWebsocket)
-/*	router.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
-		wh.handleWebsocket(w, r, hub)
-	})*/
+
 
 }
 
-func (wh *websocketHandler) handleWebsocket(w http.ResponseWriter, r *http.Request/*, hub *wsHub.Hub*/) {
+func (wh *websocketHandler) handleWebsocket(w http.ResponseWriter, r *http.Request) {
 
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
