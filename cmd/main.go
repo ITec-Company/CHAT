@@ -40,7 +40,7 @@ func main() {
 	repository := repository.New(db, logger)*/
 
 	logger.Info("Initializing httprouter...")
-	var hub = wsHub.NewHub()
+	var hub = wsHub.NewHub(logger)
 	go hub.Run()
 	handler := httpHandler.NewHandler(logger, hub /*, repository*/)
 

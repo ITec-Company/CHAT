@@ -1,10 +1,10 @@
 package wsHub
 
 import (
-	"log"
 	"time"
 
 	"github.com/gorilla/websocket"
+	"itec.chat/pkg/logging"
 )
 
 const (
@@ -14,22 +14,19 @@ const (
 	pingPeriod     = (pongWait * 9 / 10)
 )
 
-var (
-	newline = []byte{'\n'}
-	space   = []byte{' '}
-)
-
 type client struct {
-	hub  *Hub
-	send chan []byte
-	conn *websocket.Conn
+	hub    *Hub
+	send   chan []byte
+	conn   *websocket.Conn
+	logger logging.Logger
 }
 
-func NewClient(hub *Hub, conn *websocket.Conn) *client {
+func NewClient(hub *Hub, conn *websocket.Conn, logger logging.Logger) *client {
 	client := &client{
-		hub:  hub,
-		send: make(chan []byte, 256),
-		conn: conn,
+		hub:    hub,
+		send:   make(chan []byte, 256),
+		conn:   conn,
+		logger: logger,
 	}
 	client.hub.register <- client
 
@@ -52,15 +49,11 @@ func (c *client) ReadPump() {
 		_, message, err := c.conn.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				log.Print("error occurred while reading message.err: ", err)
+				c.logger.Errorf("error occurred while reading message.err: ", err)
 			}
-			log.Print("breack read pump ", err)
-
+			c.logger.Errorf("error occurred while reading message.err: ", err)
 			break
 		}
-		log.Print("READIN MESSGAE ", message)
-
-		//message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
 		c.hub.broadcast <- message
 	}
 }
@@ -71,51 +64,44 @@ func (c *client) WritePump() {
 		ticker.Stop()
 		c.conn.Close()
 	}()
-	select {
-	case message, ok := <-c.send:
-		log.Print("clients WritePump ", message)
+	for {
+		select {
+		case message, ok := <-c.send:
+			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
+			if !ok {
+				c.logger.Errorf("error occurred while setting write deadline.")
+				c.conn.WriteMessage(websocket.CloseMessage, []byte{})
+				return
+			}
 
-		c.conn.SetWriteDeadline(time.Now().Add(writeWait))
-		if !ok {
-			log.Print("error occurred while getting message.")
-			c.conn.WriteMessage(websocket.CloseMessage, []byte{})
-			return
-		}
+			w, err := c.conn.NextWriter(websocket.TextMessage)
+			if err != nil {
+				c.logger.Errorf("error occurred while getting writer. err: ", err)
+				return
+			}
+			_, err = w.Write(message)
+			if err != nil {
+				c.logger.Errorf("error occurred while writing message. err: ", err)
+				return
+			}
 
-		w, err := c.conn.NextWriter(websocket.TextMessage)
-		if err != nil {
-			log.Print("error occurred while getting message. err: ", err)
-			return
-		}
-		_, err = w.Write(message)
-		if err != nil {
-			log.Print("error occurred while writing message. err: ", err)
-			return
-		}
+			for i := 0; i < len(c.send); i++ {
+				w.Write(<-c.send)
+			}
 
-		//n := len(c.send)
-		log.Print("clients WritePump 2", message)
+			err = w.Close()
+			if err != nil {
+				c.logger.Errorf("error occurred while closing writer. err: ", err)
+				return
+			}
 
-		for i := 0; i < len(c.send); i++ {
-			log.Print("RANGE SEND WRITEPUM ", message)
-			w.Write(newline)
-			w.Write(<-c.send)
-		}
-
-		log.Print("clients WritePump 3", message)
-
-		err = w.Close()
-		if err != nil {
-			log.Print("error occurred while closing writer. err: ", err)
-			return
-		}
-
-	case <-ticker.C:
-		c.conn.SetWriteDeadline(time.Now().Add(writeWait))
-		err := c.conn.WriteMessage(websocket.PingMessage, nil)
-		if err != nil {
-			log.Print("error occurred while ping. err: ", err)
-			return
+		case <-ticker.C:
+			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
+			err := c.conn.WriteMessage(websocket.PingMessage, nil)
+			if err != nil {
+				c.logger.Errorf("error occurred while ping. err: ", err)
+				return
+			}
 		}
 	}
 
