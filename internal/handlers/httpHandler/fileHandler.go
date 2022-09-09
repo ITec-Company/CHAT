@@ -17,14 +17,14 @@ type fileHandler struct {
 	fileRepo repository.File
 }
 
-func NewFileHandler(logger logging.Logger, fileRepo repository.File) *fileHandler {
+func newFileHandler(logger logging.Logger, fileRepo repository.File) *fileHandler {
 	return &fileHandler{
 		logger:   logger,
 		fileRepo: fileRepo,
 	}
 }
 
-func (fh *fileHandler) Register(router *mux.Router) {
+func (fh *fileHandler) register(router *mux.Router) {
 	router.HandleFunc(getFiles, fh.allFiles).Methods("GET")
 }
 

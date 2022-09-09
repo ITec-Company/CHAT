@@ -17,14 +17,14 @@ type userRoleHandler struct {
 	rolesRepo repository.UserRole
 }
 
-func NewUserRoleHandler(logger logging.Logger, rolesRepo repository.UserRole) *userRoleHandler {
+func newUserRoleHandler(logger logging.Logger, rolesRepo repository.UserRole) *userRoleHandler {
 	return &userRoleHandler{
 		logger:    logger,
 		rolesRepo: rolesRepo,
 	}
 }
 
-func (urh *userRoleHandler) Register(router *mux.Router) {
+func (urh *userRoleHandler) register(router *mux.Router) {
 	router.HandleFunc(getRoles, urh.allRoles).Methods("GET")
 }
 

@@ -17,14 +17,14 @@ type userHandler struct {
 	userRepo repository.User
 }
 
-func NewUserHandler(logger logging.Logger, userRepo repository.User) *userHandler {
+func newUserHandler(logger logging.Logger, userRepo repository.User) *userHandler {
 	return &userHandler{
 		logger:   logger,
 		userRepo: userRepo,
 	}
 }
 
-func (uh *userHandler) Register(router *mux.Router) {
+func (uh *userHandler) register(router *mux.Router) {
 	router.HandleFunc(getUsers, uh.allUsers).Methods("GET")
 }
 

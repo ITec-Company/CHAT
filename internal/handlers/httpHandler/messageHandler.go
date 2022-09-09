@@ -17,14 +17,14 @@ type messageHandler struct {
 	messRepo repository.Message
 }
 
-func NewMessageHandler(logger logging.Logger, messRepo repository.Message) *messageHandler {
+func newMessageHandler(logger logging.Logger, messRepo repository.Message) *messageHandler {
 	return &messageHandler{
 		logger:   logger,
 		messRepo: messRepo,
 	}
 }
 
-func (fh *messageHandler) Register(router *mux.Router) {
+func (fh *messageHandler) register(router *mux.Router) {
 	router.HandleFunc(getMessages, fh.allMessages).Methods("GET")
 }
 
