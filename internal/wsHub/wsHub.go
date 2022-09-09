@@ -44,6 +44,13 @@ func (h *Hub) Run() {
 				h.logger.Info(" user unregister: ", client.conn.LocalAddr().String())
 				delete(h.clients, client)
 				close(client.send)
+
+			}
+			//deleting hub if if has no more clients
+			if len(h.clients) == 0 {
+				delete(hubs , h.id)
+				fmt.Printf("hub '%d' stopped\n", h.id)
+                return
 			}
 
 		case message := <-h.broadcast:
@@ -56,8 +63,8 @@ func (h *Hub) Run() {
 					delete(h.clients, client)
 				}
 			}
-
 		}
+
 	}
 }
 

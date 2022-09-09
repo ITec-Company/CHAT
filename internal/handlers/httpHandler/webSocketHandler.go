@@ -42,7 +42,6 @@ func (wh *websocketHandler) handleWebsocket(w http.ResponseWriter, r *http.Reque
 	}
 
 	hub := wsHub.GetHub(wh.logger, id)
-
 	go hub.Run()
 
 	ws, err := upgrader.Upgrade(w, r, nil)
