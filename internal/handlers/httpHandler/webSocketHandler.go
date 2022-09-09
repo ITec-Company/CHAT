@@ -2,6 +2,7 @@ package httpHandler
 
 import (
 	"net/http"
+	"runtime"
 	"strconv"
 
 	"github.com/gorilla/mux"
@@ -31,6 +32,7 @@ var upgrader = websocket.Upgrader{
 func (wh *websocketHandler) register(router *mux.Router) {
 	router.HandleFunc("/ws/{id:[0-9]+}", wh.handleWebsocket)
 	router.HandleFunc("/map", wh.getHubsMap)
+	router.HandleFunc("/g", wh.numGoroutine)
 
 }
 
@@ -41,8 +43,10 @@ func (wh *websocketHandler) handleWebsocket(w http.ResponseWriter, r *http.Reque
 		wh.logger.Errorf("err : ", err)
 	}
 
-	hub := wsHub.GetHub(wh.logger, id)
-	go hub.Run()
+	hub, exist := wsHub.GetHub(wh.logger, id)
+	if !exist {
+		go hub.Run()
+	}
 
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -59,6 +63,12 @@ func (wh *websocketHandler) handleWebsocket(w http.ResponseWriter, r *http.Reque
 
 func (wh *websocketHandler) getHubsMap(w http.ResponseWriter, r *http.Request) {
 	str := wsHub.GetStringMaps()
+
+	w.Write([]byte(str))
+}
+
+func (wh *websocketHandler) numGoroutine(w http.ResponseWriter, r *http.Request) {
+	str := strconv.Itoa(runtime.NumGoroutine())
 
 	w.Write([]byte(str))
 }

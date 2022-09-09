@@ -68,12 +68,12 @@ func (h *Hub) Run() {
 	}
 }
 
-func GetHub(logger logging.Logger, id int) *Hub {
+func GetHub(logger logging.Logger, id int) (*Hub , bool) {
 	hub, ok := hubs[id]
 	if ok {
-		return hub
+		return hub , true
 	} else {
-		return NewHub(logger, id)
+		return NewHub(logger, id) , false
 	}
 }
 
