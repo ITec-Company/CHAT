@@ -10,7 +10,6 @@ import (
 	"github.com/joho/godotenv"
 
 	"itec.chat/internal/handlers/httpHandler"
-	"itec.chat/internal/wsHub"
 
 	"itec.chat/pkg/logging"
 
@@ -40,9 +39,9 @@ func main() {
 	repository := repository.New(db, logger)*/
 
 	logger.Info("Initializing httprouter...")
-	var hub = wsHub.NewHub(logger)
-	go hub.Run()
-	handler := httpHandler.NewHandler(logger, hub /*, repository*/)
+	//	var hub = wsHub.NewHub(logger)
+	//go hub.Run()
+	handler := httpHandler.NewHandler(logger /*, repository*/)
 
 	server := server.NewServer(logger, *handler, os.Getenv("SERVER_HOST"), os.Getenv("SERVER_PORT"))
 	idleConnsClosed := make(chan struct{})

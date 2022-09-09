@@ -2,6 +2,7 @@ package httpHandler
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
@@ -11,13 +12,13 @@ import (
 
 type websocketHandler struct {
 	logger logging.Logger
-	hub    *wsHub.Hub
+	//hub    *wsHub.Hub
 }
 
-func newWebsocketHandler(logger logging.Logger, hub *wsHub.Hub) *websocketHandler {
+func newWebsocketHandler(logger logging.Logger /*, hub *wsHub.Hub*/) *websocketHandler {
 	return &websocketHandler{
 		logger: logger,
-		hub:    hub,
+		//hub:    hub,
 	}
 }
 
@@ -28,12 +29,21 @@ var upgrader = websocket.Upgrader{
 }
 
 func (wh *websocketHandler) register(router *mux.Router) {
-	router.HandleFunc("/ws" , wh.handleWebsocket)
-
+	router.HandleFunc("/ws/{id:[0-9]+}", wh.handleWebsocket)
+	router.HandleFunc("/map", wh.getHubsMap)
 
 }
 
 func (wh *websocketHandler) handleWebsocket(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		wh.logger.Errorf("err : ", err)
+	}
+
+	hub := wsHub.GetHub(wh.logger, id)
+
+	go hub.Run()
 
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -41,9 +51,15 @@ func (wh *websocketHandler) handleWebsocket(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	client := wsHub.NewClient(wh.hub, ws, wh.logger)
+	client := wsHub.NewClient(hub, ws, wh.logger)
 
 	go client.WritePump()
 	go client.ReadPump()
 
+}
+
+func (wh *websocketHandler) getHubsMap(w http.ResponseWriter, r *http.Request) {
+	str := wsHub.GetStringMaps()
+
+	w.Write([]byte(str))
 }
