@@ -17,6 +17,8 @@ type websocketHandler struct {
 }
 
 func newWebsocketHandler(logger logging.Logger /*, hub *wsHub.Hub*/) *websocketHandler {
+	go wsHub.CleanHubs()
+
 	return &websocketHandler{
 		logger: logger,
 		//hub:    hub,

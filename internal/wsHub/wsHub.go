@@ -2,6 +2,7 @@ package wsHub
 
 import (
 	"fmt"
+	"time"
 
 	"itec.chat/pkg/logging"
 )
@@ -12,6 +13,7 @@ type Hub struct {
 	broadcast  chan []byte
 	register   chan *client
 	unregister chan *client
+	stop       chan bool
 	logger     logging.Logger
 }
 
@@ -24,6 +26,7 @@ func NewHub(logger logging.Logger, id int) *Hub {
 		broadcast:  make(chan []byte),
 		register:   make(chan *client),
 		unregister: make(chan *client),
+		stop:       make(chan bool),
 		logger:     logger,
 	}
 	hubs[id] = hub
@@ -46,12 +49,6 @@ func (h *Hub) Run() {
 				close(client.send)
 
 			}
-			//deleting hub if if has no more clients
-			if len(h.clients) == 0 {
-				delete(hubs , h.id)
-				fmt.Printf("hub '%d' stopped\n", h.id)
-                return
-			}
 
 		case message := <-h.broadcast:
 
@@ -61,19 +58,25 @@ func (h *Hub) Run() {
 				default:
 					close(client.send)
 					delete(h.clients, client)
+
 				}
 			}
+
+		case <-h.stop:
+			delete(hubs, h.id)
+			fmt.Printf("hub '%d' stopped\n", h.id)
+			return
 		}
 
 	}
 }
 
-func GetHub(logger logging.Logger, id int) (*Hub , bool) {
+func GetHub(logger logging.Logger, id int) (*Hub, bool) {
 	hub, ok := hubs[id]
 	if ok {
-		return hub , true
+		return hub, true
 	} else {
-		return NewHub(logger, id) , false
+		return NewHub(logger, id), false
 	}
 }
 
@@ -93,5 +96,27 @@ func (h *Hub) getClientInfo() string {
 
 	}
 	return str
+
+}
+
+func CleanHubs() {
+	duration := time.Duration(time.Second * 5)
+	ticker := time.NewTicker(duration)
+	defer func() {
+		ticker.Stop()
+	}()
+
+	for range ticker.C {
+		fmt.Println("ticker")
+		for _, hub := range hubs {
+			if len(hub.clients) == 0 {
+				delete(hubs, hub.id)
+				hub.stop <- true
+
+			}
+
+		}
+
+	}
 
 }
