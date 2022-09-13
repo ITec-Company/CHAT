@@ -33,7 +33,7 @@ func NewHandler(logger logging.Logger /*, repository *repository.Repository*/) *
 
 func (h *Handler) InitRoutes() *mux.Router {
 	router := mux.NewRouter()
-	h.websocketHandler.register(router) //ws
+	h.websocketHandler.register(router) 
 
 	/*	h.userHandler.register(router)
 		h.chatHandler.register(router)

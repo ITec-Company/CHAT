@@ -1,8 +1,8 @@
 package wsHub
 
 import (
+	"errors"
 	"fmt"
-	"time"
 
 	"itec.chat/pkg/logging"
 )
@@ -13,25 +13,27 @@ type Hub struct {
 	broadcast  chan []byte
 	register   chan *client
 	unregister chan *client
-	stop       chan bool
 	logger     logging.Logger
 }
 
 var hubs = make(map[int]*Hub)
 
-func NewHub(logger logging.Logger, id int) *Hub {
-	hub := &Hub{
-		id:         id,
-		clients:    make(map[*client]bool),
-		broadcast:  make(chan []byte),
-		register:   make(chan *client),
-		unregister: make(chan *client),
-		stop:       make(chan bool),
-		logger:     logger,
-	}
-	hubs[id] = hub
+func NewHub(logger logging.Logger, id int) (*Hub, error) {
+	if !isExist(id) {
+		hub := &Hub{
+			id:         id,
+			clients:    make(map[*client]bool),
+			broadcast:  make(chan []byte),
+			register:   make(chan *client),
+			unregister: make(chan *client),
+			logger:     logger,
+		}
+		hubs[id] = hub
 
-	return hub
+		return hub, nil
+	}
+	return nil, errors.New("error occured while creating hub. err: hub already exist")
+
 }
 
 func (h *Hub) Run() {
@@ -39,7 +41,6 @@ func (h *Hub) Run() {
 		select {
 		case client := <-h.register:
 			h.logger.Info("new user: ", client.conn.LocalAddr().String())
-
 			h.clients[client] = true
 
 		case client := <-h.unregister:
@@ -48,6 +49,14 @@ func (h *Hub) Run() {
 				delete(h.clients, client)
 				close(client.send)
 
+			}
+			//deleting hub if if has no more clients
+			if len(h.clients) == 0 {
+				delete(hubs, h.id)
+				close(h.broadcast)
+				close(h.register)
+				close(h.unregister)
+				return
 			}
 
 		case message := <-h.broadcast:
@@ -58,26 +67,25 @@ func (h *Hub) Run() {
 				default:
 					close(client.send)
 					delete(h.clients, client)
-
 				}
 			}
-
-		case <-h.stop:
-			delete(hubs, h.id)
-			fmt.Printf("hub '%d' stopped\n", h.id)
-			return
 		}
 
 	}
 }
 
-func GetHub(logger logging.Logger, id int) (*Hub, bool) {
+func GetHub(logger logging.Logger, id int) (*Hub, error) {
 	hub, ok := hubs[id]
 	if ok {
-		return hub, true
+		return hub, nil
 	} else {
-		return NewHub(logger, id), false
+		return nil, errors.New("error occured while getting hub. err: no hub with such id")
 	}
+}
+
+func isExist(id int) bool {
+	_, ok := hubs[id]
+	return ok
 }
 
 func GetStringMaps() string {
@@ -96,27 +104,5 @@ func (h *Hub) getClientInfo() string {
 
 	}
 	return str
-
-}
-
-func CleanHubs() {
-	duration := time.Duration(time.Second * 5)
-	ticker := time.NewTicker(duration)
-	defer func() {
-		ticker.Stop()
-	}()
-
-	for range ticker.C {
-		fmt.Println("ticker")
-		for _, hub := range hubs {
-			if len(hub.clients) == 0 {
-				delete(hubs, hub.id)
-				hub.stop <- true
-
-			}
-
-		}
-
-	}
 
 }
