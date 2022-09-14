@@ -36,7 +36,7 @@ var upgrader = websocket.Upgrader{
 
 func (wh *websocketHandler) register(router *mux.Router) {
 	router.HandleFunc(connect, wh.handleWebsocket)
-	router.HandleFunc(newHub, wh.NewHub(wh.handleWebsocket)).Methods(http.MethodPost)
+	router.HandleFunc(newHub, wh.NewHub).Methods(http.MethodPost)
 
 	router.HandleFunc("/map", wh.getHubsMap)
 	router.HandleFunc("/g", wh.numGoroutine)
@@ -84,28 +84,23 @@ func (wh *websocketHandler) numGoroutine(w http.ResponseWriter, r *http.Request)
 	w.Write([]byte(str))
 }
 
-func (wh *websocketHandler) NewHub(next http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		vars := mux.Vars(r)
-		id, err := strconv.Atoi(vars["id"])
-		if err != nil {
-			wh.logger.Errorf("err: ", err)
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-		hub, err := wsHub.NewHub(wh.logger, id)
-		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("Hub alreary xist"))
-			fmt.Println("3")
-
-		} else {
-			go hub.Run()
-			w.WriteHeader(http.StatusCreated)
-			w.Write([]byte("Hub is created"))
-			fmt.Println("4")
-
-		}
-
+func (wh *websocketHandler) NewHub(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		wh.logger.Errorf("err: ", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
+	hub, err := wsHub.NewHub(wh.logger, id)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Hub alreary exist"))
+		return
+	} else {
+		go hub.Run()
+		w.WriteHeader(http.StatusCreated)
+		w.Write([]byte("Hub is created"))
+	}
+
 }
