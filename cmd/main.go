@@ -10,6 +10,7 @@ import (
 	"github.com/joho/godotenv"
 
 	"itec.chat/internal/handlers/httpHandler"
+	"itec.chat/internal/models"
 
 	"itec.chat/pkg/logging"
 
@@ -21,8 +22,9 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error loading .env file. %s", err.Error())
 	}
-
 	logger := logging.GetLogger()
+
+	models.InitValidator()
 
 	/*db, err := postgres.NewPostgresDB(&postgres.PostgresDB{
 		Host:     os.Getenv("DB_HOST"),

@@ -9,7 +9,7 @@ type Handler struct {
 	logger           logging.Logger
 	websocketHandler *websocketHandler
 	//repository      *repository.Repository
-	//userHandler     *userHandler
+	userHandler     *userHandler
 	//fileHandler     *fileHandler
 	//chatHandler     *chatHandler
 	//messageHandler  *messageHandler
@@ -22,7 +22,7 @@ func NewHandler(logger logging.Logger /*, repository *repository.Repository*/) *
 		logger:           logger,
 		websocketHandler: newWebsocketHandler(logger),
 		//repository:      repository,
-		//userHandler:     NewUserHandler(logger, repository.User),
+		userHandler:     newUserHandler(logger,/* repository.User*/),
 		//fileHandler:     NewFileHandler(logger, repository.File),
 		//	chatHandler:     NewChatHandler(logger, repository.Chat),
 		//	messageHandler:  NewMessageHandler(logger, repository.Message),
@@ -33,13 +33,13 @@ func NewHandler(logger logging.Logger /*, repository *repository.Repository*/) *
 
 func (h *Handler) InitRoutes() *mux.Router {
 	router := mux.NewRouter()
-	h.websocketHandler.register(router) 
+	h.websocketHandler.register(router)
 
-	/*	h.userHandler.register(router)
-		h.chatHandler.register(router)
-		h.fileHandler.register(router)
-		h.messageHandler.register(router)
-		h.statusHandler.register(router)
-		h.statusHandler.register(router)*/
+	h.userHandler.register(router)
+	/*h.chatHandler.register(router)
+	h.fileHandler.register(router)
+	h.messageHandler.register(router)
+	h.statusHandler.register(router)
+	h.statusHandler.register(router)*/
 	return router
 }

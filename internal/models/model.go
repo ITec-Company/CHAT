@@ -1,16 +1,19 @@
 package models
 
-import "time"
+import (
+	"time"
+)
 
 const (
 	OrderASC  Order = "asc"
 	OrderDESC Order = "desc"
+
 )
 
 type Order string
 
 type User struct {
-	ID           int       `json:"id"`
+	ID           int       `json:"id" `
 	ProfileID    int       `json:"profile_id"`
 	Name         string    `json:"name"`
 	LastActivity time.Time `json:"last_activity"`
@@ -19,23 +22,23 @@ type User struct {
 }
 
 type CreateUser struct {
-	ProfileID    int       `json:"profile_id"`
-	Name         string    `json:"name"`
+	ProfileID    int       `json:"profile_id" valid:"required ,id"`
+	Name         string    `json:"name" valid:"required, name"`
 	LastActivity time.Time `json:"last_activity"`
-	RoleID       int       `json:"role_id"`
-	StatusID     int       `json:"status_id"`
+	RoleID       int       `json:"role_id" valid:"required,id"`
+	StatusID     int       `json:"status_id" valid:"required,id"`
 }
 
 type UpdateUser struct {
-	ID           int       `json:"id"`
-	Name         string    `json:"name"`
+	ID           int       `json:"id" valid:"required ,id"`
+	Name         string    `json:"name" valid:"required, name"`
 	LastActivity time.Time `json:"last_activity"`
-	RoleID       int       `json:"role_id"`
+	RoleID       int       `json:"role_id" valid:"required,id"`
 }
 
-type UpdateUserStatus struct{
-	ID           int       `json:"id"`
-	StatusID     int       `json:"status_id"`
+type UpdateUserStatus struct {
+	ID       int `json:"id" valid:"required ,id"`
+	StatusID int `json:"status_id" valid:"required,id"`
 }
 
 type Chat struct {
