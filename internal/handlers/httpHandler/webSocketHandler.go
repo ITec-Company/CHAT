@@ -1,7 +1,10 @@
 package httpHandler
 
 import (
+	"fmt"
 	"net/http"
+	"runtime"
+	"strconv"
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
@@ -9,15 +12,19 @@ import (
 	"itec.chat/pkg/logging"
 )
 
+const (
+	connect = "/ws/{id:[0-9]+}"
+	newHub  = "/hub/new/{id:[0-9]+}"
+)
+
 type websocketHandler struct {
 	logger logging.Logger
-	hub    *wsHub.Hub
 }
 
-func newWebsocketHandler(logger logging.Logger, hub *wsHub.Hub) *websocketHandler {
+func newWebsocketHandler(logger logging.Logger) *websocketHandler {
+
 	return &websocketHandler{
 		logger: logger,
-		hub:    hub,
 	}
 }
 
@@ -28,12 +35,29 @@ var upgrader = websocket.Upgrader{
 }
 
 func (wh *websocketHandler) register(router *mux.Router) {
-	router.HandleFunc("/ws" , wh.handleWebsocket)
+	router.HandleFunc(connect, wh.handleWebsocket)
+	router.HandleFunc(newHub, wh.NewHub).Methods(http.MethodPost)
 
+	router.HandleFunc("/map", wh.getHubsMap)
+	router.HandleFunc("/g", wh.numGoroutine)
 
 }
 
 func (wh *websocketHandler) handleWebsocket(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		wh.logger.Errorf("err : ", err)
+	}
+
+	hub, err := wsHub.GetHub(wh.logger, id)
+	if err != nil {
+		wh.logger.Errorf("err :", err)
+		w.WriteHeader(http.StatusBadRequest)
+		str := fmt.Sprintf("Hub doest exist. id:%d ", id)
+		w.Write([]byte(str))
+		return
+	}
 
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -41,9 +65,42 @@ func (wh *websocketHandler) handleWebsocket(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	client := wsHub.NewClient(wh.hub, ws, wh.logger)
+	client := wsHub.NewClient(hub, ws, wh.logger)
 
 	go client.WritePump()
 	go client.ReadPump()
+
+}
+
+func (wh *websocketHandler) getHubsMap(w http.ResponseWriter, r *http.Request) {
+	str := wsHub.GetStringMaps()
+
+	w.Write([]byte(str))
+}
+
+func (wh *websocketHandler) numGoroutine(w http.ResponseWriter, r *http.Request) {
+	str := strconv.Itoa(runtime.NumGoroutine())
+
+	w.Write([]byte(str))
+}
+
+func (wh *websocketHandler) NewHub(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		wh.logger.Errorf("err: ", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	hub, err := wsHub.NewHub(wh.logger, id)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Hub alreary exist"))
+		return
+	} else {
+		go hub.Run()
+		w.WriteHeader(http.StatusCreated)
+		w.Write([]byte("Hub is created"))
+	}
 
 }

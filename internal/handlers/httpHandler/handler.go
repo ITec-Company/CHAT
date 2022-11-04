@@ -2,7 +2,6 @@ package httpHandler
 
 import (
 	"github.com/gorilla/mux"
-	"itec.chat/internal/wsHub"
 	"itec.chat/pkg/logging"
 )
 
@@ -18,10 +17,10 @@ type Handler struct {
 	//userRoleHandler *userRoleHandler
 }
 
-func NewHandler(logger logging.Logger, hub *wsHub.Hub /*, repository *repository.Repository*/) *Handler {
+func NewHandler(logger logging.Logger /*, repository *repository.Repository*/) *Handler {
 	return &Handler{
 		logger:           logger,
-		websocketHandler: newWebsocketHandler(logger, hub),
+		websocketHandler: newWebsocketHandler(logger),
 		//repository:      repository,
 		//userHandler:     NewUserHandler(logger, repository.User),
 		//fileHandler:     NewFileHandler(logger, repository.File),
@@ -34,7 +33,7 @@ func NewHandler(logger logging.Logger, hub *wsHub.Hub /*, repository *repository
 
 func (h *Handler) InitRoutes() *mux.Router {
 	router := mux.NewRouter()
-	h.websocketHandler.register(router) //ws
+	h.websocketHandler.register(router) 
 
 	/*	h.userHandler.register(router)
 		h.chatHandler.register(router)
